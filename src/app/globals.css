@@ -3,24 +3,69 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --muted: #666666;
+  --subtle: #fafafa;
+  --border: #eaeaea;
+  --border-strong: #d4d4d4;
+  --accent: #0070f3;
+  --on-foreground: var(--background);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --muted: #a1a1a1;
+    --subtle: #111111;
+    --border: #262626;
+    --border-strong: #3a3a3a;
+    --accent: #3291ff;
   }
+}
+
+/* Colour theme picked by the viewer (see lib/palette.ts): its main colour replaces
+   the foreground, its secondary tint replaces the subtle backgrounds. */
+:root[data-color] {
+  --foreground: var(--main);
+  --on-foreground: var(--on-main);
+  --subtle: var(--main-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-color] {
+    --subtle: color-mix(in srgb, var(--main) 16%, var(--background));
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-on-foreground: var(--on-foreground);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+.btn {
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-subtle hover:border-border-strong disabled:pointer-events-none disabled:opacity-50;
+}
+.btn-primary {
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-md bg-foreground px-4 text-sm font-medium text-on-foreground transition-opacity hover:opacity-85 disabled:pointer-events-none disabled:opacity-50;
+}
+.btn-icon {
+  @apply inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-foreground disabled:pointer-events-none disabled:opacity-40;
+}
+.input {
+  @apply h-9 rounded-md border border-border bg-background px-3 text-sm outline-none transition-colors placeholder:text-muted focus:border-border-strong focus:ring-2 focus:ring-foreground/10;
+}
 }
