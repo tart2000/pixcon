@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
 import { STYLES, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
@@ -27,21 +26,21 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   const filtered = useMemo(() => icons.filter((i) => matchesQuery(i, query)), [icons, query]);
 
   // The open icon lives in the URL (?icon=name) so it can be shared; back closes it.
-  const openName = useSearchParams().get("icon");
+  const openName = useSyncExternalStore(subscribeUrl, () => new URLSearchParams(location.search).get("icon"), () => null);
   const pushed = useRef(false);
   // Browse the filtered list, unless a shared link points outside it.
   const browsing = filtered.some((i) => i.name === openName) ? filtered : icons;
   const openIndex = browsing.findIndex((i) => i.name === openName);
   const iconUrl = (name: string) => `?icon=${encodeURIComponent(name)}`;
   const openIcon = (i: Item) => {
-    window.history.pushState(null, "", iconUrl(i.name));
+    setUrl("push", iconUrl(i.name));
     pushed.current = true;
   };
   const closeIcon = () => {
     if (pushed.current) {
       pushed.current = false;
       window.history.back();
-    } else window.history.replaceState(null, "", window.location.pathname);
+    } else setUrl("replace", window.location.pathname);
   };
 
   /** Pixels of the selected variant, or null when this icon has no fill yet. */
@@ -149,7 +148,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
         <IconModal
           icons={browsing}
           index={openIndex}
-          onIndex={(n) => window.history.replaceState(null, "", iconUrl(browsing[n].name))}
+          onIndex={(n) => setUrl("replace", iconUrl(browsing[n].name))}
           onClose={closeIcon}
           variant={variant}
           setVariant={setVariant}
@@ -159,4 +158,21 @@ export function IconGallery({ icons }: { icons: Item[] }) {
       )}
     </div>
   );
+}
+
+// The URL is read through our own store rather than useSearchParams, which would need a
+// Suspense boundary and leave the gallery out of the static export's HTML.
+const URL_CHANGE = "pixcon:url";
+function subscribeUrl(cb: () => void) {
+  window.addEventListener("popstate", cb);
+  window.addEventListener(URL_CHANGE, cb);
+  return () => {
+    window.removeEventListener("popstate", cb);
+    window.removeEventListener(URL_CHANGE, cb);
+  };
+}
+function setUrl(mode: "push" | "replace", url: string) {
+  if (mode === "push") window.history.pushState(null, "", url);
+  else window.history.replaceState(null, "", url);
+  window.dispatchEvent(new Event(URL_CHANGE));
 }

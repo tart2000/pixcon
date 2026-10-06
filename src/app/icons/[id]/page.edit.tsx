@@ -1,10 +1,15 @@
 import { notFound } from "next/navigation";
 import { getIcon, getIconPosition, listAlts } from "@/lib/db";
 import { Editor } from "@/components/Editor";
-import { canEdit } from "@/lib/editing";
 
-export default async function IconPage({ params, searchParams }: PageProps<"/icons/[id]">) {
-  if (!canEdit) notFound();
+// Typed by hand: this route only exists on the dev server, so PageProps<"/icons/[id]"> is missing from production builds.
+export default async function IconPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const id = Number((await params).id);
   if (!Number.isInteger(id)) notFound();
   const icon = await getIcon(id);

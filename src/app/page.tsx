@@ -3,7 +3,8 @@ import { listIcons } from "@/lib/db";
 import { IconGallery } from "@/components/IconGallery";
 
 export default async function Home() {
-  await connection();
+  // Live data per request; the static GitHub Pages export reads it once at build time.
+  if (!process.env.STATIC_EXPORT) await connection();
   const icons = (await listIcons("validated")).sort((a, b) => a.name.localeCompare(b.name));
 
   return (

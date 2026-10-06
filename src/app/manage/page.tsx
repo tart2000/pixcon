@@ -6,7 +6,8 @@ import { canEdit } from "@/lib/editing";
 export const metadata = { title: `${canEdit ? "Manage" : "Requests"} · Pixcon` };
 
 export default async function ManagePage() {
-  await connection();
+  // Live data per request; the static GitHub Pages export reads it once at build time.
+  if (!process.env.STATIC_EXPORT) await connection();
   const icons = await listIcons();
 
   return (
