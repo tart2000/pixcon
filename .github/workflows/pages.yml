@@ -28,6 +28,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Check DATABASE_URL secret
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Missing DATABASE_URL secret (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
       - run: npm ci
       - run: npm run build
         env:
