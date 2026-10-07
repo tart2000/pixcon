@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeSync } from "@/components/ThemeSync";
 import { THEME_SCRIPT } from "@/lib/palette";
 import { canEdit } from "@/lib/editing";
+import { STYLES } from "@/lib/svg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,9 +24,31 @@ const londrina = Londrina_Solid({
   subsets: ["latin"],
 });
 
+const DESCRIPTION = `Open-source 11×11 pixel icons with personality, in ${STYLES.length} styles. Add one tiny script and drop them straight into your HTML, or grab the SVG.`;
+
+// The share image comes from app/opengraph-image.jpg and app/twitter-image.jpg.
 export const metadata: Metadata = {
-  title: "Pixcon",
-  description: "Collaborative 11×11 pixel icons, exportable as SVG.",
+  metadataBase: new URL("https://pixcon.vercel.app"),
+  title: { default: "Pixcon · Pixel icons with personality", template: "%s · Pixcon" },
+  description: DESCRIPTION,
+  applicationName: "Pixcon",
+  keywords: ["pixel icons", "icon library", "open source icons", "SVG icons", "pixel art", "icon font", "11x11"],
+  authors: [{ name: "POC studio", url: "https://pocstudio.fr" }],
+  creator: "POC studio",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Pixcon",
+    url: "/",
+    title: "Pixcon · Pixel icons with personality",
+    description: DESCRIPTION,
+    locale: "en",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pixcon · Pixel icons with personality",
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

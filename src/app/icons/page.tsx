@@ -1,8 +1,13 @@
 import { connection } from "next/server";
 import { listIcons } from "@/lib/db";
+import { pageMeta } from "@/lib/meta";
 import { IconGallery } from "@/components/IconGallery";
 
-export const metadata = { title: "Icons · Pixcon" };
+export const metadata = pageMeta(
+  "Icons",
+  "Browse every Pixcon icon: search by name or tag, pick a style and a colour, then copy the HTML or the SVG.",
+  "/icons",
+);
 
 export default async function IconsPage() {
   await connection();

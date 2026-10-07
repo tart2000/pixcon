@@ -3,10 +3,15 @@ import Script from "next/script";
 import { CodeBlock } from "@/components/CodeBlock";
 import { KIT_SCRIPT, KIT_URL } from "@/lib/kit";
 import { kitSizeKB } from "@/lib/kitSize";
+import { pageMeta } from "@/lib/meta";
 import { VARIANTS } from "@/lib/pixels";
 import { STYLES } from "@/lib/svg";
 
-export const metadata = { title: "How to · Pixcon" };
+export const metadata = pageMeta(
+  "How to",
+  "Add the Pixcon script to your page and write icons as plain HTML, or download them as SVG files.",
+  "/how-to",
+);
 
 const DEMO = "heart";
 

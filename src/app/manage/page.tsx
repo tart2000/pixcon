@@ -2,8 +2,9 @@ import { connection } from "next/server";
 import { listIcons } from "@/lib/db";
 import { ManageList } from "@/components/ManageList";
 import { canEdit } from "@/lib/editing";
+import { pageMeta } from "@/lib/meta";
 
-export const metadata = { title: `${canEdit ? "Manage" : "Requests"} · Pixcon` };
+export const metadata = pageMeta(canEdit ? "Manage" : "Requests", "Request a pixel icon and follow its progress.", "/manage");
 
 export default async function ManagePage() {
   await connection();
