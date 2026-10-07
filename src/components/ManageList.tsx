@@ -107,7 +107,7 @@ export function ManageList({ icons }: { icons: Item[] }) {
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-hidden rounded-lg border border-border bg-background">
         <div
           className={`hidden items-center gap-4 border-b border-border bg-subtle px-4 py-2 text-xs text-muted sm:grid ${canEdit ? "grid-cols-[88px_1fr_160px_120px_80px]" : "grid-cols-[88px_1fr_160px_120px]"}`}
         >

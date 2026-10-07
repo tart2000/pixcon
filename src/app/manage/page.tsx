@@ -13,7 +13,7 @@ export default async function ManagePage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">{canEdit ? "Manage" : "Requests"}</h1>
+        <h1 className="font-display text-4xl">{canEdit ? "Manage" : "Requests"}</h1>
         <p className="text-muted">
           {canEdit
             ? "Request icons, track what’s being drawn, and validate what’s ready to ship."

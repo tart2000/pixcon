@@ -48,11 +48,14 @@
   --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-londrina);
 }
 
 body {
   background: var(--subtle);
   color: var(--foreground);
+  /* Full-bleed sections (home hero) span 100vw; don't let them cause a horizontal scroll. */
+  overflow-x: clip;
 }
 
 @layer components {
@@ -65,7 +68,44 @@ body {
 .btn-icon {
   @apply inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-foreground disabled:pointer-events-none disabled:opacity-40;
 }
+/* Chunky call-to-action with a hard pixel shadow that presses in on click. */
+.btn-fun {
+  @apply inline-flex h-12 items-center justify-center gap-2.5 rounded-lg border-2 border-foreground bg-background px-6 text-base font-semibold text-foreground transition-[translate,box-shadow] duration-100;
+  --fun-shadow: var(--foreground);
+  box-shadow: 4px 4px 0 0 var(--fun-shadow);
+}
+.btn-fun:hover {
+  translate: -2px -2px;
+  box-shadow: 6px 6px 0 0 var(--fun-shadow);
+}
+.btn-fun:active {
+  translate: 4px 4px;
+  box-shadow: 0 0 0 0 var(--fun-shadow);
+}
+.btn-fun-primary {
+  @apply bg-foreground text-on-foreground;
+  --fun-shadow: color-mix(in srgb, var(--foreground) 55%, black);
+}
 .input {
   @apply h-9 rounded-md border border-border bg-background px-3 text-sm outline-none transition-colors placeholder:text-muted focus:border-border-strong focus:ring-2 focus:ring-foreground/10;
 }
+}
+
+/* Home hero icon wall: clear in the middle so the text stays readable, wider on phones. */
+.hero-fade {
+  --fade: radial-gradient(ellipse 45% 62% at 50% 50%, transparent 45%, black 100%);
+  -webkit-mask-image: var(--fade);
+  mask-image: var(--fade);
+}
+/* Hero height is a whole number of 44px icon rows, so no row is cut at the bottom. */
+.hero-rows {
+  height: calc(13 * 44px);
+}
+@media (max-width: 640px) {
+  .hero-rows {
+    height: calc(16 * 44px);
+  }
+  .hero-fade {
+    --fade: radial-gradient(ellipse 95% 42% at 50% 50%, transparent 45%, black 100%);
+  }
 }

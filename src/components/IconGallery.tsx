@@ -55,10 +55,11 @@ export function IconGallery({ icons }: { icons: Item[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Toolbar: search, then how to show icons (variant, style, colour) + how big. */}
-      <div className="flex flex-col gap-2">
+      {/* Toolbar: search, then how to show icons (variant, style, colour) + how big.
+          Sticks under the 56px header; the padding is cancelled by negative margins so the layout doesn't move. */}
+      <div className="sticky top-14 z-[5] -mx-4 -my-3 flex flex-col gap-2 bg-subtle/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
         <input
-          className="input w-full"
+          className="input h-12 w-full px-4 text-base"
           placeholder={`Search ${icons.length} icons…`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -68,7 +69,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
           <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
           <ColorPicker align="left" />
           <label
-            className="flex h-9 items-center gap-3 rounded-md border border-border px-3 sm:ml-auto"
+            className="flex h-9 items-center gap-3 rounded-md border border-border bg-background px-3 sm:ml-auto"
             title="Preview size"
           >
             <input

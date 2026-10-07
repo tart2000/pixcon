@@ -14,7 +14,7 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div
-      className="inline-flex max-w-full flex-wrap gap-0.5 rounded-md border border-border p-[3px]"
+      className="inline-flex max-w-full flex-wrap gap-0.5 rounded-md border border-border bg-background p-[3px]"
       role="radiogroup"
       aria-label={label}
     >

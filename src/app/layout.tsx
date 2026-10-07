@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Londrina_Solid } from "next/font/google";
 import "./globals.css";
 import { ThemeSync } from "@/components/ThemeSync";
 import { THEME_SCRIPT } from "@/lib/palette";
@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/** Display face for headings and key figures (`font-display`). */
+const londrina = Londrina_Solid({
+  variable: "--font-londrina",
+  weight: "400",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Pixcon",
   description: "Collaborative 11×11 pixel icons, exportable as SVG.",
@@ -25,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${londrina.variable} h-full antialiased`}
       // The theme script sets the picked colour on <html> before React hydrates.
       suppressHydrationWarning
     >
@@ -34,9 +41,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col font-sans">
         <ThemeSync />
-        <header className="sticky top-0 z-10 border-b border-border bg-subtle/80 backdrop-blur">
+        <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+            <Link href="/" className="flex items-center gap-2 font-display text-xl">
               <Logo />
               Pixcon
             </Link>
@@ -65,6 +72,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+        <footer className="border-t border-border bg-background">
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-center px-4 text-sm text-muted sm:px-6">
+            <p>
+              A project by{" "}
+              <a
+                href="https://pocstudio.fr"
+                target="_blank"
+                rel="noopener"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                POC studio
+              </a>
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   );

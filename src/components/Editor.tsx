@@ -288,6 +288,8 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
+      {/* The editor sits on plain white rather than the tinted page background. */}
+      <div aria-hidden className="fixed inset-0 -z-10 bg-background" />
       {/* Canvas */}
       <section className="flex min-w-0 flex-col gap-3">
         {/* Same width as the board below. */}
