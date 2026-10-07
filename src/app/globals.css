@@ -51,7 +51,7 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--subtle);
   color: var(--foreground);
 }
 

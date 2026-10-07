@@ -38,6 +38,7 @@ function assertValidatable(pixels: string, fill: string | null) {
 
 function revalidate(id?: number) {
   revalidatePath("/");
+  revalidatePath("/icons");
   revalidatePath("/manage");
   if (id) revalidatePath(`/icons/${id}`);
 }

@@ -34,22 +34,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col font-sans">
         <ThemeSync />
-        <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
+        <header className="sticky top-0 z-10 border-b border-border bg-subtle/80 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
               <Logo />
               Pixcon
             </Link>
             <nav className="flex items-center gap-1">
-              <Link
-                href="/"
-                className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block"
-              >
+              <Link href="/icons" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
                 Icons
               </Link>
-              <Link href="/manage" className="rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground">
-                {canEdit ? "Manage" : "Requests"}
+              <Link href="/getting-started" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
+                Getting started
               </Link>
+              {canEdit && (
+                <Link href="/manage" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
+                  Manage
+                </Link>
+              )}
               {canEdit ? (
                 <Link href="/new" className="btn-primary ml-2 h-8 px-3 whitespace-nowrap">
                   New icon

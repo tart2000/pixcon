@@ -1,21 +1,21 @@
-import { connection } from "next/server";
-import { listIcons } from "@/lib/db";
-import { IconGallery } from "@/components/IconGallery";
+import Link from "next/link";
 
-export default async function Home() {
-  // Live data per request; the static GitHub Pages export reads it once at build time.
-  if (!process.env.STATIC_EXPORT) await connection();
-  const icons = (await listIcons("validated")).sort((a, b) => a.name.localeCompare(b.name));
-
+// Placeholder home page, to be designed.
+export default function Home() {
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Icons</h1>
-        <p className="text-muted">
-          Open-source 11×11 pixel icons, drawn together. Pick a variant and a style, then copy or download as SVG.
-        </p>
+    <div className="flex flex-col items-center gap-6 py-16 text-center sm:py-24">
+      <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">Pixel icons, drawn together.</h1>
+      <p className="max-w-xl text-lg text-muted">
+        Open-source 11×11 pixel icons in several styles, free to copy or download as SVG.
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Link href="/icons" className="btn-primary">
+          Browse icons
+        </Link>
+        <Link href="/getting-started" className="btn">
+          Getting started
+        </Link>
       </div>
-      <IconGallery icons={icons.map(({ id, name, alts, pixels, pixels_fill }) => ({ id, name, alts, pixels, fill: pixels_fill }))} />
     </div>
   );
 }
