@@ -19,28 +19,35 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   const [style, setStyle] = useState<StyleId>("liquid-blob");
   const [variant, setVariant] = useState<Variant>("regular");
   const [size, setSize] = useState(68);
-  const [query, setQuery] = useState("");
   const [copied, setCopied] = useState<number | null>(null);
   const color = useIconColor();
 
+  // The search (?q=) and the open icon (?icon=name) live in the URL so both can be shared; back closes the icon.
+  const search = useSyncExternalStore(subscribeUrl, () => location.search, () => "");
+  const params = new URLSearchParams(search);
+  const query = params.get("q") ?? "";
+  const openName = params.get("icon");
+  const setQuery = (q: string) => setUrl("replace", urlWith({ q }));
   const filtered = useMemo(() => icons.filter((i) => matchesQuery(i, query)), [icons, query]);
-
-  // The open icon lives in the URL (?icon=name) so it can be shared; back closes it.
-  const openName = useSyncExternalStore(subscribeUrl, () => new URLSearchParams(location.search).get("icon"), () => null);
   const pushed = useRef(false);
   // Browse the filtered list, unless a shared link points outside it.
   const browsing = filtered.some((i) => i.name === openName) ? filtered : icons;
   const openIndex = browsing.findIndex((i) => i.name === openName);
-  const iconUrl = (name: string) => `?icon=${encodeURIComponent(name)}`;
   const openIcon = (i: Item) => {
-    setUrl("push", iconUrl(i.name));
+    setUrl("push", urlWith({ icon: i.name }));
     pushed.current = true;
   };
   const closeIcon = () => {
     if (pushed.current) {
       pushed.current = false;
       window.history.back();
-    } else setUrl("replace", window.location.pathname);
+    } else setUrl("replace", urlWith({ icon: null }));
+  };
+  /** A tag clicked in the popup: close it and search for that tag. */
+  const showTag = (tag: string) => {
+    pushed.current = false;
+    setUrl("replace", urlWith({ icon: null, q: tag }));
+    window.scrollTo({ top: 0 });
   };
 
   /** Pixels of the selected variant, or null when this icon has no fill yet. */
@@ -56,8 +63,9 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Toolbar: search, then how to show icons (variant, style, colour) + how big.
-          Sticks under the 56px header; the padding is cancelled by negative margins so the layout doesn't move. */}
-      <div className="sticky top-14 z-[5] -mx-4 -my-3 flex flex-col gap-2 bg-subtle/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+          A full-width white band that starts right under the header (cancelling main's top padding) and sticks there. */}
+      <div className="sticky top-14 z-[5] -mt-8 ml-[calc(50%-50vw)] w-screen border-b border-border bg-background sm:-mt-10">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-4 sm:px-6">
         <input
           className="input h-12 w-full px-4 text-base"
           placeholder={`Search ${icons.length} icons…`}
@@ -84,6 +92,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
             />
             <span className="w-11 text-right font-mono text-xs text-muted">{size}px</span>
           </label>
+        </div>
         </div>
       </div>
 
@@ -149,8 +158,9 @@ export function IconGallery({ icons }: { icons: Item[] }) {
         <IconModal
           icons={browsing}
           index={openIndex}
-          onIndex={(n) => setUrl("replace", iconUrl(browsing[n].name))}
+          onIndex={(n) => setUrl("replace", urlWith({ icon: browsing[n].name }))}
           onClose={closeIcon}
+          onTag={showTag}
           variant={variant}
           setVariant={setVariant}
           style={style}
@@ -171,6 +181,16 @@ function subscribeUrl(cb: () => void) {
     window.removeEventListener("popstate", cb);
     window.removeEventListener(URL_CHANGE, cb);
   };
+}
+/** Current URL with some query params changed; empty values are dropped. */
+function urlWith(changes: Record<string, string | null>) {
+  const params = new URLSearchParams(location.search);
+  for (const [k, v] of Object.entries(changes)) {
+    if (v) params.set(k, v);
+    else params.delete(k);
+  }
+  const s = params.toString();
+  return s ? `?${s}` : location.pathname;
 }
 function setUrl(mode: "push" | "replace", url: string) {
   if (mode === "push") window.history.pushState(null, "", url);

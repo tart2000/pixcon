@@ -170,6 +170,16 @@ export default async function Home() {
           Read the guide
         </Link>
       </section>
+
+      <section className="flex flex-col items-center gap-5 rounded-xl border border-border bg-background px-6 py-14 text-center">
+        <span className="text-muted">{glyph("magnifying-glass", 40)}</span>
+        <h2 className="font-display text-4xl sm:text-5xl">Not finding what you&apos;re looking for?</h2>
+        <p className="max-w-md text-muted">Tell us which icon you need and it goes on the drawing list.</p>
+        <Link href="/manage" className="btn-fun btn-fun-primary mt-2">
+          {glyph("plus")}
+          Request an icon
+        </Link>
+      </section>
     </div>
   );
 }

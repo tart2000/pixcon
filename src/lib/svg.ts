@@ -245,11 +245,12 @@ function liquidPath(g: Grid, r = 3.5, c = 3.5): string {
 
 /**
  * Retro style: a CRT look. Each horizontal run of pixels becomes two scanlines, one per
- * half-pixel row, sitting at its bottom: pills a quarter of a pixel tall, fully rounded.
+ * half-pixel row, sitting at its bottom: fully rounded pills a third of a pixel tall.
  */
 function retroPath(g: Grid): string {
-  const h = U / 4;
+  const h = U / 3;
   const r = h / 2;
+  const n = (v: number) => +v.toFixed(3);
   let d = "";
   for (let y = 0; y < GRID; y++) {
     let x = 0;
@@ -263,7 +264,7 @@ function retroPath(g: Grid): string {
       const x0 = start * U;
       const x1 = x * U;
       for (const b of [y * U + U / 2, (y + 1) * U]) {
-        d += `M${x0 + r} ${b}A${r} ${r} 0 0 1 ${x0 + r} ${b - h}H${x1 - r}A${r} ${r} 0 0 1 ${x1 - r} ${b}Z`;
+        d += `M${n(x0 + r)} ${b}A${n(r)} ${n(r)} 0 0 1 ${n(x0 + r)} ${n(b - h)}H${n(x1 - r)}A${n(r)} ${n(r)} 0 0 1 ${n(x1 - r)} ${b}Z`;
       }
     }
   }

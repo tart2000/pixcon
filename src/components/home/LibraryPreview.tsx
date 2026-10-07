@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { VARIANTS, type Variant } from "@/lib/pixels";
 import { STYLES, type StyleId } from "@/lib/svg";
+import { ColorPicker } from "../ColorPicker";
 import { IconGlyph } from "../IconGlyph";
 import { Segmented } from "../Segmented";
 
@@ -19,6 +20,10 @@ export function LibraryPreview({ icons, total }: { icons: Item[]; total: number 
       <div className="flex flex-wrap items-center gap-2">
         <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
         <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
+        {/* The picked colour themes the whole site, these icons included. */}
+        <div className="sm:ml-auto">
+          <ColorPicker />
+        </div>
       </div>
       <ul className="grid grid-cols-4 overflow-hidden rounded-lg border border-border sm:grid-cols-6 lg:grid-cols-8">
         {icons.map((i) => (

@@ -20,6 +20,7 @@ export function IconModal({
   index,
   onIndex,
   onClose,
+  onTag,
   variant,
   setVariant,
   style,
@@ -29,6 +30,8 @@ export function IconModal({
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
+  /** Search the library for a tag. */
+  onTag: (tag: string) => void;
   variant: Variant;
   setVariant: (v: Variant) => void;
   style: StyleId;
@@ -163,9 +166,14 @@ export function IconModal({
         {(icon.alts.length > 0 || canEdit) && (
           <footer className="flex flex-wrap items-center gap-1.5">
             {icon.alts.map((a) => (
-              <span key={a} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-muted">
+              <button
+                key={a}
+                onClick={() => onTag(a)}
+                title={`Show icons tagged “${a}”`}
+                className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-border-strong hover:bg-subtle hover:text-foreground"
+              >
                 {a}
-              </span>
+              </button>
             ))}
             {canEdit && (
               <Link
