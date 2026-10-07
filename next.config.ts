@@ -8,7 +8,7 @@ export default function config(phase: string): NextConfig {
   return {
     // Drawing pages (`page.edit.tsx`) only exist on the local dev server.
     pageExtensions: phase === PHASE_DEVELOPMENT_SERVER ? ["edit.tsx", "tsx", "ts"] : ["tsx", "ts"],
-    env: { STATIC_EXPORT: pages ? "1" : "" },
+    env: { STATIC_EXPORT: pages ? "1" : "", BASE_PATH: pages ? "/pixcon" : "" },
     ...(pages && {
       output: "export",
       basePath: "/pixcon",

@@ -24,6 +24,7 @@ import { Segmented } from "./Segmented";
 import { Menu, MenuItem } from "./Menu";
 import { importPhosphor } from "@/lib/phosphor";
 import { toSlug, typingSlug } from "@/lib/slug";
+import { reservedReason } from "@/lib/reserved";
 import { AltsInput } from "./AltsInput";
 import { STATUSES, type Status } from "@/lib/status";
 
@@ -104,7 +105,8 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
     };
   }, [slug, saved.name, icon?.id]);
   const nameTaken = !!slug && slug !== saved.name && takenSlug === slug;
-  const nameOk = !!slug && !nameTaken;
+  const nameReserved = slug ? reservedReason(slug) : null;
+  const nameOk = !!slug && !nameTaken && !nameReserved;
 
   /** Apply a change to the active variant as one undoable step. `from` is the state to restore on undo. */
   const commit = useCallback(
@@ -372,10 +374,15 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
             onChange={(e) => setName(typingSlug(e.target.value))}
             onBlur={() => setName(toSlug)}
             onKeyDown={(e) => e.key === "Enter" && nameOk && dirty && save()}
-            aria-invalid={nameTaken}
+            aria-invalid={nameTaken || !!nameReserved}
           />
           {nameTaken && (
             <p className="text-sm text-red-600 dark:text-red-400">“{slug}” is already taken by another icon.</p>
+          )}
+          {nameReserved && (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              “{slug}” is reserved ({nameReserved}): the kit reads it as <code>px-{slug}</code>.
+            </p>
           )}
           <label htmlFor="alts" className="mt-2 text-sm font-medium">
             Alts <span className="font-normal text-muted">· other names people search for</span>

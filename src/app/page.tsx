@@ -6,6 +6,9 @@ import { STYLES, type StyleId } from "@/lib/svg";
 import { IconGlyph } from "@/components/IconGlyph";
 import { HeroPattern } from "@/components/home/HeroPattern";
 import { LibraryPreview } from "@/components/home/LibraryPreview";
+import { CodeBlock } from "@/components/CodeBlock";
+import { KIT_SCRIPT } from "@/lib/kit";
+import { kitSizeKB } from "@/lib/kitSize";
 
 /** Icons shown in the library preview, when they exist. */
 const PREVIEW = [
@@ -34,6 +37,7 @@ export default async function Home() {
     return i ? <IconGlyph pixels={i.pixels} style="pixel" size={size} /> : null;
   };
   // Top up with other icons if some aren't drawn yet, so the grid always ends on a full row.
+  const kb = kitSizeKB();
   const preview = [
     ...PREVIEW.flatMap((n) => byName.get(n) ?? []),
     ...[...byName.values()].filter((i) => !PREVIEW.includes(i.name)),
@@ -77,7 +81,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className={`grid gap-4 sm:grid-cols-2 ${kb ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         {stats.map((s) => (
           <div key={s.label} className="flex flex-col gap-3 rounded-xl border border-border bg-background p-6">
             <span className="text-muted">{glyph(s.icon, 24)}</span>
@@ -85,6 +89,14 @@ export default async function Home() {
             <span className="text-muted">{s.label}</span>
           </div>
         ))}
+        {/* The kit's weight, measured on the built file: the highlight of the row. */}
+        {kb && (
+          <div className="flex flex-col gap-3 rounded-xl bg-foreground p-6 text-on-foreground">
+            <span className="opacity-70">{glyph("lightning", 24)}</span>
+            <span className="font-display text-6xl">{kb} KB</span>
+            <span className="opacity-80">The whole kit, gzipped. Every icon in one tiny file.</span>
+          </div>
+        )}
       </section>
 
       <section className="flex flex-col gap-8">
@@ -97,14 +109,15 @@ export default async function Home() {
             return (
               <div
                 key={st.id}
-                className="flex w-full items-center gap-5 rounded-xl border border-border bg-background p-6 sm:w-[calc((100%-2rem)/3)]"
+                className="flex w-full items-center gap-5 rounded-xl border border-border bg-background p-5 sm:w-[calc((100%-2rem)/3)]"
               >
-                <div className="flex size-32 shrink-0 items-center justify-center">
+                <div className="flex shrink-0 items-center justify-center rounded-lg bg-subtle p-4">
                   {i && <IconGlyph pixels={(fill && i.fill) || i.pixels} style={st.id} size={128} />}
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
                   <h3 className="font-display text-2xl">{st.label}</h3>
-                  <p className="text-muted">{text}</p>
+                  <code className="font-mono text-xs whitespace-nowrap text-muted">px-{st.id}</code>
+                  <p className="mt-1 text-sm text-muted">{text}</p>
                 </div>
               </div>
             );
@@ -118,12 +131,16 @@ export default async function Home() {
       </section>
 
       <section className="flex flex-col gap-8">
-        <SectionTitle eyebrow="How to use" title="Copy, paste, done." badge="Guide coming soon" />
+        <SectionTitle eyebrow="How to use" title="Copy, paste, done." />
         <ol className="grid gap-4 sm:grid-cols-3">
           {[
-            { title: "Pick an icon", text: "Search the library by name or tag, and open the icon you need.", icon: "magnifying-glass" },
-            { title: "Make it yours", text: "Choose the regular or fill variant, one of five styles and a colour.", icon: "paintbrush" },
-            { title: "Copy the SVG", text: "Paste it straight into your code or design tool, or download the file.", icon: "copy" },
+            {
+              title: "Add the script",
+              text: `One line in your page${kb ? `, ${kb} KB gzipped` : ""}. Every icon is included.`,
+              icon: "code",
+            },
+            { title: "Write an <i>", text: "Name the icon, then pick a style and a variant with classes.", icon: "pencil" },
+            { title: "Style it like text", text: "Icons take the font size and colour of their parent.", icon: "paintbrush" },
           ].map((step, n) => (
             <li key={step.title} className="flex flex-col gap-3 rounded-xl border border-border bg-background p-6">
               <div className="flex items-center justify-between">
@@ -135,6 +152,16 @@ export default async function Home() {
             </li>
           ))}
         </ol>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="font-mono text-xs text-muted">In your &lt;head&gt;</span>
+            <CodeBlock code={KIT_SCRIPT} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="font-mono text-xs text-muted">Anywhere in your page</span>
+            <CodeBlock code={`<i class="px px-heart px-blob px-fill"></i>`} />
+          </div>
+        </div>
         <Link href="/getting-started" className="btn-fun self-center">
           {glyph("book-open")}
           Read the guide
@@ -144,15 +171,10 @@ export default async function Home() {
   );
 }
 
-function SectionTitle({ eyebrow, title, badge }: { eyebrow: string; title: string; badge?: string }) {
+function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-xs tracking-[0.2em] text-muted uppercase">{eyebrow}</span>
-        {badge && (
-          <span className="rounded-full bg-foreground px-2 py-0.5 text-xs font-medium text-on-foreground">{badge}</span>
-        )}
-      </div>
+      <span className="font-mono text-xs tracking-[0.2em] text-muted uppercase">{eyebrow}</span>
       <h2 className="font-display text-4xl sm:text-5xl">{title}</h2>
     </div>
   );

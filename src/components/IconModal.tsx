@@ -6,6 +6,7 @@ import { VARIANTS, decode, type Variant } from "@/lib/pixels";
 import { STYLES, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { canEdit } from "@/lib/editing";
+import { kitTag } from "@/lib/kit";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
@@ -34,11 +35,13 @@ export function IconModal({
   setStyle: (s: StyleId) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const [copied, setCopied] = useState<"name" | "link" | "svg" | null>(null);
+  const [copied, setCopied] = useState<"name" | "link" | "code" | null>(null);
+  const [format, setFormat] = useState<"html" | "svg">("html");
   const color = useIconColor();
   const icon = icons[index];
   const pixels = variant === "fill" ? (icon.fill ?? icon.pixels) : icon.pixels;
   const svg = iconSvg(decode(pixels), style, { color: color ?? undefined });
+  const code = format === "html" ? kitTag(icon.name, style, variant) : svg;
 
   useEffect(() => {
     const d = ref.current;
@@ -47,7 +50,7 @@ export function IconModal({
 
   const step = (delta: number) => onIndex((index + delta + icons.length) % icons.length);
 
-  const copy = async (what: "name" | "link" | "svg", text: string) => {
+  const copy = async (what: "name" | "link" | "code", text: string) => {
     await navigator.clipboard.writeText(text);
     setCopied(what);
     setTimeout(() => setCopied((c) => (c === what ? null : c)), 1200);
@@ -118,13 +121,33 @@ export function IconModal({
               <ColorPicker />
             </div>
             <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
-            <pre className="max-h-48 overflow-auto rounded-lg border border-border bg-subtle p-3 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap text-muted">
-              {svg}
-            </pre>
+            <div className="flex flex-col gap-2">
+              <Segmented
+                label="Code"
+                options={[
+                  { id: "html", label: "HTML" },
+                  { id: "svg", label: "SVG" },
+                ]}
+                value={format}
+                onChange={setFormat}
+              />
+              <pre className="max-h-48 overflow-auto rounded-lg bg-foreground p-3 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap text-on-foreground">
+                {code}
+              </pre>
+              {format === "html" && (
+                <p className="text-xs text-muted">
+                  Needs the Pixcon kit on the page,{" "}
+                  <Link href="/getting-started" className="text-foreground underline underline-offset-2">
+                    see Getting started
+                  </Link>
+                  .
+                </p>
+              )}
+            </div>
             <div className="flex gap-2">
-              <button className="btn-primary flex-1" onClick={() => copy("svg", svg)}>
-                {copied === "svg" ? <CheckIcon /> : <CopyIcon />}
-                {copied === "svg" ? "Copied" : "Copy SVG"}
+              <button className="btn-primary flex-1" onClick={() => copy("code", code)}>
+                {copied === "code" ? <CheckIcon /> : <CopyIcon />}
+                {copied === "code" ? "Copied" : format === "html" ? "Copy HTML" : "Copy SVG"}
               </button>
               <button
                 className="btn flex-1"

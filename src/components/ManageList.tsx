@@ -8,6 +8,7 @@ import { IconGlyph } from "./IconGlyph";
 import { matchesQuery } from "@/lib/alts";
 import { toSlug, typingSlug } from "@/lib/slug";
 import { canEdit } from "@/lib/editing";
+import { reservedReason } from "@/lib/reserved";
 
 type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; status: Status; updatedAt: string };
 
@@ -33,6 +34,7 @@ export function ManageList({ icons }: { icons: Item[] }) {
 
   const slug = toSlug(request);
   const existing = slug ? icons.find((i) => i.name === slug) : undefined;
+  const reserved = slug ? reservedReason(slug) : null;
 
   const run = (fn: () => Promise<void>) => {
     setError(null);
@@ -47,7 +49,7 @@ export function ManageList({ icons }: { icons: Item[] }) {
 
   const submitRequest = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!slug || existing) return;
+    if (!slug || existing || reserved) return;
     run(async () => {
       await requestIcon(slug);
       setRequest("");
@@ -71,11 +73,15 @@ export function ManageList({ icons }: { icons: Item[] }) {
               setRequested(null);
             }}
           />
-          <button className="btn-primary" disabled={!slug || !!existing || pending}>
+          <button className="btn-primary" disabled={!slug || !!existing || !!reserved || pending}>
             Request
           </button>
         </div>
-        {existing ? (
+        {reserved ? (
+          <p className="text-sm text-muted">
+            <span className="font-mono text-foreground">{slug}</span> is reserved ({reserved}), pick another name.
+          </p>
+        ) : existing ? (
           <p className="text-sm text-muted">
             <span className="font-mono text-foreground">{existing.name}</span> already exists ·{" "}
             {STATUSES.find((s) => s.id === existing.status)!.label}

@@ -7,12 +7,15 @@ import { isStatus, type Status } from "@/lib/status";
 import { cleanAlts } from "@/lib/alts";
 import { toSlug } from "@/lib/slug";
 import { assertCanEdit } from "@/lib/editing";
+import { reservedReason } from "@/lib/reserved";
 
 const EMPTY = "0".repeat(CELLS);
 
 function cleanName(name: string) {
   const n = toSlug(name);
   if (!n) throw new Error("Name is required");
+  const reserved = reservedReason(n);
+  if (reserved) throw new Error(`“${n}” is reserved (${reserved})`);
   return n;
 }
 

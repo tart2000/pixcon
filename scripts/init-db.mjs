@@ -23,4 +23,9 @@ await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS alts TEXT[] NOT NULL DEFAUL
 await sql`CREATE UNIQUE INDEX IF NOT EXISTS icons_name_key ON icons (name)`;
 await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_name_slug_check`;
 await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_slug_check CHECK (name ~ '^[a-z0-9]+(-[a-z0-9]+)*$')`;
+// Names the kit reads as modifiers (px-blob, px-fill…); keep in sync with src/lib/reserved.ts.
+await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_name_reserved_check`;
+await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_reserved_check CHECK (name NOT IN (
+  'pixel', 'rounded', 'blob', 'liquid', 'liquid-blob', 'regular', 'fill', 'xs', 'sm', 'lg', 'xl', '2x', '3x', 'spin', 'fw'
+))`;
 console.log("icons table ready");

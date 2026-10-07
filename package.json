@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:kit && next build",
     "start": "next start",
     "lint": "eslint",
     "db:init": "node --env-file=.env.local scripts/init-db.mjs",
-    "db:seed": "node --env-file=.env.local scripts/seed.mjs"
+    "db:seed": "node --env-file=.env.local scripts/seed.mjs",
+    "build:kit": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env.local scripts/build-kit.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
@@ -22,6 +23,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",

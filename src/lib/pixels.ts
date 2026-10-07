@@ -11,6 +11,13 @@ export const decode = (s: string): Grid =>
 
 export const encode = (g: Grid): string => g.map((v) => (v ? "1" : "0")).join("");
 
+/** Compact form served by the kit: 121 bits as 31 hex digits (padded with zeros). */
+export const toHex = (s: string): string =>
+  (s + "000").match(/.{4}/g)!.map((b) => parseInt(b, 2).toString(16)).join("");
+
+export const fromHex = (hex: string): Grid =>
+  Array.from({ length: CELLS }, (_, i) => ((parseInt(hex[i >> 2], 16) >> (3 - (i & 3))) & 1) === 1);
+
 export const isValidPixels = (s: unknown): s is string =>
   typeof s === "string" && s.length === CELLS && /^[01]+$/.test(s);
 
