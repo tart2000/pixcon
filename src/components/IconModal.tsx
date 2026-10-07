@@ -13,7 +13,7 @@ import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
 import { CheckIcon, ChevronIcon, CloseIcon, CopyIcon, DownloadIcon, LinkIcon } from "./UiIcons";
 
-type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null };
+type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number };
 
 /** Icon details popup: big preview, variant/style/colour, SVG code to copy or download. */
 export function IconModal({
@@ -185,12 +185,13 @@ export function IconModal({
               </button>
             ))}
             {canEdit && (
-              <Link
-                href={`/icons/${icon.id}${variant === "fill" ? "?variant=fill" : ""}`}
-                className="btn ml-auto h-8"
-              >
-                Edit
-              </Link>
+              <div className="ml-auto flex items-center gap-3">
+                {/* Count when the page was loaded, before this view. */}
+                <span className="font-mono text-xs text-muted">views: {icon.views}</span>
+                <Link href={`/icons/${icon.id}${variant === "fill" ? "?variant=fill" : ""}`} className="btn h-8">
+                  Edit
+                </Link>
+              </div>
             )}
           </footer>
         )}

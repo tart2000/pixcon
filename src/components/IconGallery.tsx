@@ -13,7 +13,7 @@ import { canEdit } from "@/lib/editing";
 import { IconModal } from "./IconModal";
 import { CheckIcon, CopyIcon, DownloadIcon } from "./UiIcons";
 
-type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null };
+type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number };
 
 export function IconGallery({ icons }: { icons: Item[] }) {
   const [style, setStyle] = useState<StyleId>("liquid-blob");
