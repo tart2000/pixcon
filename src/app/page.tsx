@@ -18,6 +18,16 @@ const PREVIEW = [
   "chat", "headphones", "bicycle", "space-invaders", "robot", "ufo", "skull", "sparkles",
 ];
 
+/** Families shown on the home page: a tag, its label and six hand-picked icons from it. */
+const FAMILIES = [
+  { tag: "retro", label: "Retro", icons: ["computer-retro", "floppy-disk", "game-console-handheld", "space-invaders", "ghost", "mushroom-retro"] },
+  { tag: "outdoors", label: "Outdoors", icons: ["tent", "mountains", "compass", "binoculars", "tree", "table-picnic"] },
+  { tag: "animal", label: "Animals", icons: ["cat", "dog", "owl", "elephant", "rabbit", "snail"] },
+  { tag: "food", label: "Food", icons: ["candy", "barbecue", "icecream-cone", "cherries", "coffee", "cheese"] },
+  { tag: "game", label: "Games", icons: ["dice-five", "gamepad", "joystick", "bowling-ball", "trophy", "axe-battle"] },
+  { tag: "transport", label: "Transport", icons: ["airplane", "bicycle", "bus", "truck", "scooter", "helicopter"] },
+];
+
 const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 
 /** One showcase icon and a line of description per style. */
@@ -43,12 +53,18 @@ export default async function Home() {
   };
   // Top up with other icons if some aren't drawn yet, so the grid always ends on a full row.
   const kb = kitSizeKB();
+  const families = FAMILIES.map((f) => ({
+    ...f,
+    total: icons.filter((i) => i.alts.includes(f.tag)).length,
+    picks: f.icons.flatMap((n) => byName.get(n) ?? []),
+  }));
   const preview = [
     ...PREVIEW.flatMap((n) => byName.get(n) ?? []),
     ...[...byName.values()].filter((i) => !PREVIEW.includes(i.name)),
   ].slice(0, PREVIEW.length);
-  // Round down so the "+" stays true: 332 → 330+.
-  const count = icons.length >= 20 ? `${Math.floor(icons.length / 10) * 10}+` : String(icons.length);
+  // Round down to a modest figure so the "+" stays true: 334 → 300+.
+  const step = icons.length >= 100 ? 100 : 10;
+  const count = icons.length >= 20 ? `${Math.floor(icons.length / step) * step}+` : String(icons.length);
 
   const stats = [
     { value: count, label: "Icons in the library", icon: "grid" },
@@ -66,16 +82,17 @@ export default async function Home() {
             Open source · 11×11 pixel grid
           </span>
           <h1 className="font-display text-6xl leading-[0.95] sm:text-7xl">
-            Pixel icons,
+            Pixel icons
             <br />
-            drawn together.
+            with personality.
           </h1>
           <p className="max-w-xl text-lg text-muted">
-            Tiny grids, big personality. Pick a style, pick a colour, copy the SVG.
+            Add one tiny script and drop icons straight into your HTML. Pick a style, pick a colour, or just grab the
+            SVG.
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-4">
             <Link href="/icons" className="btn-fun btn-fun-primary">
-              {glyph("grid")}
+              {glyph("eyes")}
               Browse icons
             </Link>
             <Link href="/how-to" className="btn-fun">
@@ -99,7 +116,7 @@ export default async function Home() {
           <div className="flex flex-col gap-3 rounded-xl bg-foreground p-6 text-on-foreground">
             <span className="opacity-70">{glyph("code", 24)}</span>
             <span className="font-display text-6xl">{kb} KB</span>
-            <span className="opacity-80">The whole kit. Every icon in one tiny file.</span>
+            <span className="opacity-80">Every icon in one tiny file.</span>
           </div>
         )}
       </section>
@@ -128,6 +145,39 @@ export default async function Home() {
             );
           })}
         </div>
+      </section>
+
+      <section className="flex flex-col gap-8">
+        <SectionTitle eyebrow="The families" title="Something for every project." />
+        {/* A table: one white panel, rows split by lines like its border, fixed columns so everything lines up. */}
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-background">
+          {families.map((f) => (
+            <li
+              key={f.tag}
+              className="grid grid-cols-1 items-center gap-3 px-5 py-3 sm:grid-cols-[10rem_1fr_13rem] sm:gap-6"
+            >
+              <div className="flex items-baseline gap-2 sm:flex-col sm:gap-0">
+                <h3 className="font-display text-3xl">{f.label}</h3>
+                <span className="text-sm text-muted">{f.total} icons</span>
+              </div>
+              <div className="grid grid-cols-6 gap-2">
+                {f.picks.map((i) => (
+                  <Link
+                    key={i.name}
+                    href={`/icons?icon=${encodeURIComponent(i.name)}`}
+                    title={i.name}
+                    className="flex h-14 items-center justify-center rounded-lg transition-colors hover:bg-subtle"
+                  >
+                    <IconGlyph pixels={i.pixels} style="liquid-blob" size={36} />
+                  </Link>
+                ))}
+              </div>
+              <Link href={`/icons?q=${encodeURIComponent(f.tag)}`} className="btn w-full">
+                See all {f.label.toLowerCase()} →
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="flex flex-col gap-8">
