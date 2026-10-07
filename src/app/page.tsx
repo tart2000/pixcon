@@ -26,8 +26,11 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   rounded: { icon: "heart", text: "The same pixels, every corner gently softened.", fill: true },
   blob: { icon: "ghost", text: "Fully round corners, like little bubbles." },
   liquid: { icon: "cat", text: "Pixels melt into each other." },
-  "liquid-blob": { icon: "ufo", text: "Melted pixels with fully round curves." },
+  "liquid-blob": { icon: "eyes", text: "Melted pixels with fully round curves." },
   retro: { icon: "computer-retro", text: "Glowing scanlines, like an old CRT screen.", fill: true },
+  stitch: { icon: "flower", text: "Every pixel a cross, like embroidery." },
+  knit: { icon: "hat-winter", text: "Rows of little chevrons, like a cosy jumper." },
+  dots: { icon: "dice-six", text: "Four round dots per pixel, like an LED board." },
 };
 
 export default async function Home() {

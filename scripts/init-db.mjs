@@ -28,6 +28,6 @@ await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS views INTEGER NOT NULL DEFA
 // Names the kit reads as modifiers (px-blob, px-fill…); keep in sync with src/lib/reserved.ts.
 await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_name_reserved_check`;
 await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_reserved_check CHECK (name NOT IN (
-  'pixel', 'rounded', 'blob', 'liquid', 'liquid-blob', 'retro', 'regular', 'fill', 'xs', 'sm', 'lg', 'xl', '2x', '3x', 'spin', 'fw'
+  'pixel', 'rounded', 'blob', 'liquid', 'liquid-blob', 'retro', 'stitch', 'knit', 'dots', 'regular', 'fill', 'xs', 'sm', 'lg', 'xl', '2x', '3x', 'spin', 'fw'
 ))`;
 console.log("icons table ready");

@@ -7,6 +7,9 @@ export const STYLES = [
   { id: "liquid", label: "Liquid" },
   { id: "liquid-blob", label: "Liquid Blob" },
   { id: "retro", label: "Retro" },
+  { id: "stitch", label: "Stitch" },
+  { id: "knit", label: "Knit" },
+  { id: "dots", label: "Dots" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -271,6 +274,86 @@ function retroPath(g: Grid): string {
   return d;
 }
 
+/**
+ * Round-capped strokes as filled pills, for the needlework styles. Each segment is a pill
+ * `cap` wide on each side, all wound the same way so overlaps merge under the nonzero rule.
+ * The drawing is shrunk by `cap` on each side so caps on the grid's edge stay in the viewBox.
+ */
+function roundStrokes(segments: [number, number, number, number][], cap: number): string {
+  const k = (SIZE - 2 * cap) / SIZE;
+  const r = cap * k;
+  const n = (v: number) => +v.toFixed(3);
+  const at = (v: number) => cap + v * k;
+  return segments
+    .map(([ax, ay, bx, by]) => {
+      [ax, ay, bx, by] = [at(ax), at(ay), at(bx), at(by)];
+      const len = Math.hypot(bx - ax, by - ay);
+      const ox = (-(by - ay) / len) * r;
+      const oy = ((bx - ax) / len) * r;
+      return (
+        `M${n(ax + ox)} ${n(ay + oy)}L${n(bx + ox)} ${n(by + oy)}` +
+        `A${n(r)} ${n(r)} 0 0 0 ${n(bx - ox)} ${n(by - oy)}` +
+        `L${n(ax - ox)} ${n(ay - oy)}A${n(r)} ${n(r)} 0 0 0 ${n(ax + ox)} ${n(ay + oy)}Z`
+      );
+    })
+    .join("");
+}
+
+/** Every filled pixel's segments, from its top-left corner (x0, y0). */
+function eachPixel(g: Grid, segs: (x0: number, y0: number) => [number, number, number, number][]) {
+  const out: [number, number, number, number][] = [];
+  for (let y = 0; y < GRID; y++) for (let x = 0; x < GRID; x++) if (on(g, x, y)) out.push(...segs(x * U, y * U));
+  return out;
+}
+
+/**
+ * Stitch style: cross-stitch embroidery. Each pixel is an X joining its corners, strokes
+ * 0.4 of a pixel thick, so neighbouring crosses join at their corners.
+ */
+function stitchPath(g: Grid): string {
+  return roundStrokes(
+    eachPixel(g, (x0, y0) => [
+      [x0, y0, x0 + U, y0 + U],
+      [x0 + U, y0, x0, y0 + U],
+    ]),
+    U / 5,
+  );
+}
+
+/**
+ * Knit style: knitted stitches. Each pixel holds two stacked chevrons (^), apex on the top
+ * edge then half a pixel lower, arms reaching the side edges at 45°; strokes a third of a
+ * pixel thick, so side-by-side pixels zigzag like a row of knitting.
+ */
+function knitPath(g: Grid): string {
+  return roundStrokes(
+    eachPixel(g, (x0, y0) =>
+      [0, U / 2].flatMap((dy): [number, number, number, number][] => {
+        const top = y0 + dy;
+        return [
+          [x0, top + U / 2, x0 + U / 2, top],
+          [x0 + U / 2, top, x0 + U, top + U / 2],
+        ];
+      }),
+    ),
+    U / 6,
+  );
+}
+
+/** Dots style: each pixel is filled with 2×2 touching circles, a quarter of a pixel in radius. */
+function dotsPath(g: Grid): string {
+  const r = U / 4;
+  let d = "";
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++) {
+      if (!on(g, x, y)) continue;
+      for (const cy of [y * U + r, y * U + 3 * r])
+        for (const cx of [x * U + r, x * U + 3 * r])
+          d += `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+    }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -285,6 +368,12 @@ export function iconPath(g: Grid, style: StyleId): string {
       return blobPath(g);
     case "retro":
       return retroPath(g);
+    case "stitch":
+      return stitchPath(g);
+    case "knit":
+      return knitPath(g);
+    case "dots":
+      return dotsPath(g);
   }
 }
 
