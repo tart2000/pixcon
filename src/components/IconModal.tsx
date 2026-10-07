@@ -137,8 +137,8 @@ export function IconModal({
               {format === "html" && (
                 <p className="text-xs text-muted">
                   Needs the Pixcon kit on the page,{" "}
-                  <Link href="/getting-started" className="text-foreground underline underline-offset-2">
-                    see Getting started
+                  <Link href="/how-to" className="text-foreground underline underline-offset-2">
+                    see How to
                   </Link>
                   .
                 </p>

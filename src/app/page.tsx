@@ -76,9 +76,9 @@ export default async function Home() {
               {glyph("grid")}
               Browse icons
             </Link>
-            <Link href="/getting-started" className="btn-fun">
+            <Link href="/how-to" className="btn-fun">
               {glyph("book-open")}
-              Getting started
+              How to
             </Link>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default async function Home() {
           <div className="flex flex-col gap-3 rounded-xl bg-foreground p-6 text-on-foreground">
             <span className="opacity-70">{glyph("code", 24)}</span>
             <span className="font-display text-6xl">{kb} KB</span>
-            <span className="opacity-80">The whole kit, gzipped. Every icon in one tiny file.</span>
+            <span className="opacity-80">The whole kit. Every icon in one tiny file.</span>
           </div>
         )}
       </section>
@@ -139,10 +139,10 @@ export default async function Home() {
           {[
             {
               title: "Add the script",
-              text: `One line in your page${kb ? `, ${kb} KB gzipped` : ""}. Every icon is included.`,
+              text: `One line in your page${kb ? `, ${kb} KB` : ""}. Every icon is included.`,
               icon: "code",
             },
-            { title: "Write an <i>", text: "Name the icon, then pick a style and a variant with classes.", icon: "pencil" },
+            { title: "Summon an icon", text: "Drop a tiny <i> tag, say which icon, style and variant you want, and poof, it appears.", icon: "magic" },
             { title: "Style it like text", text: "Icons take the font size and colour of their parent.", icon: "paintbrush" },
           ].map((step, n) => (
             <li key={step.title} className="flex flex-col gap-3 rounded-xl border border-border bg-background p-6">
@@ -165,7 +165,7 @@ export default async function Home() {
             <CodeBlock code={`<i class="px px-heart px-blob px-fill"></i>`} />
           </div>
         </div>
-        <Link href="/getting-started" className="btn-fun self-center">
+        <Link href="/how-to" className="btn-fun self-center">
           {glyph("book-open")}
           Read the guide
         </Link>

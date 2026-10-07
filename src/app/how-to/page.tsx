@@ -6,7 +6,7 @@ import { kitSizeKB } from "@/lib/kitSize";
 import { VARIANTS } from "@/lib/pixels";
 import { STYLES } from "@/lib/svg";
 
-export const metadata = { title: "Getting started · Pixcon" };
+export const metadata = { title: "How to · Pixcon" };
 
 const DEMO = "heart";
 
@@ -19,9 +19,9 @@ export default function GettingStartedPage() {
       <Script src={`${process.env.BASE_PATH}/kit/pixcon.js`} />
 
       <header className="flex flex-col gap-3">
-        <h1 className="font-display text-5xl">Getting started</h1>
+        <h1 className="font-display text-5xl">How to</h1>
         <p className="text-lg text-muted">
-          Pixcon ships as one small script{kb ? ` (${kb} KB gzipped)` : ""} with every icon included. Add it once, then write
+          Pixcon ships as one small script{kb ? ` (${kb} KB)` : ""} with every icon included. Add it once, then write
           icons as plain HTML.
         </p>
       </header>
@@ -98,6 +98,17 @@ export default function GettingStartedPage() {
         </div>
         <p className="text-muted">
           Icons added later (React, Vue, AJAX…) are drawn automatically, and changing a class redraws the icon.
+        </p>
+      </Step>
+
+      <Step n={5} title="Rather have SVG files?">
+        <p className="text-muted">
+          No script needed. Open any icon in{" "}
+          <Link href="/icons" className="text-foreground underline underline-offset-4">
+            the library
+          </Link>
+          , pick a variant, a style and a colour, then copy the SVG or download it. Paste it into your code, Figma or any
+          design tool.
         </p>
       </Step>
     </div>

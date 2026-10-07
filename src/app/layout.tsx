@@ -51,8 +51,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/icons" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
                 Icons
               </Link>
-              <Link href="/getting-started" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
-                Getting started
+              <Link href="/how-to" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
+                How to
               </Link>
               {canEdit && (
                 <Link href="/manage" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
@@ -72,15 +72,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
-        <footer className="border-t border-border bg-background">
-          <div className="mx-auto flex h-14 max-w-6xl items-center justify-center px-4 text-sm text-muted sm:px-6">
-            <p>
+        {/* Inverted: the main colour as background. */}
+        <footer className="bg-foreground text-on-foreground">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-center px-4 text-sm sm:px-6">
+            <p className="text-on-foreground/75">
               A project by{" "}
               <a
                 href="https://pocstudio.fr"
                 target="_blank"
                 rel="noopener"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
+                className="font-semibold text-on-foreground underline underline-offset-4 hover:opacity-80"
               >
                 POC studio
               </a>
