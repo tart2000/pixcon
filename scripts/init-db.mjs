@@ -25,6 +25,8 @@ await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_name_slug_check`;
 await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_slug_check CHECK (name ~ '^[a-z0-9]+(-[a-z0-9]+)*$')`;
 // How many times each icon was opened in the gallery popup.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS views INTEGER NOT NULL DEFAULT 0`;
+// How many times each icon was downloaded as SVG (any style or variant).
+await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS downloads INTEGER NOT NULL DEFAULT 0`;
 // Names the kit reads as modifiers (px-blob, px-fill…); keep in sync with src/lib/reserved.ts.
 await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_name_reserved_check`;
 await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_reserved_check CHECK (name NOT IN (

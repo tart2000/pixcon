@@ -7,13 +7,13 @@ import { STYLES, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg"
 import { useIconColor } from "@/lib/iconColor";
 import { canEdit } from "@/lib/editing";
 import { kitTag } from "@/lib/kit";
-import { recordView } from "@/app/actions";
+import { recordDownload, recordView } from "@/app/actions";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
 import { CheckIcon, ChevronIcon, CloseIcon, CopyIcon, DownloadIcon, LinkIcon } from "./UiIcons";
 
-type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number };
+type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
 
 /** Icon details popup: big preview, variant/style/colour, SVG code to copy or download. */
 export function IconModal({
@@ -163,7 +163,10 @@ export function IconModal({
               </button>
               <button
                 className="btn flex-1"
-                onClick={() => downloadFile(`${slugify(icon.name)}-${variant}-${style}.svg`, svg)}
+                onClick={() => {
+                  downloadFile(`${slugify(icon.name)}-${variant}-${style}.svg`, svg);
+                  recordDownload(icon.id).catch(() => {});
+                }}
               >
                 <DownloadIcon />
                 Download SVG
@@ -186,8 +189,10 @@ export function IconModal({
             ))}
             {canEdit && (
               <div className="ml-auto flex items-center gap-3">
-                {/* Count when the page was loaded, before this view. */}
-                <span className="font-mono text-xs text-muted">views: {icon.views}</span>
+                {/* Counts when the page was loaded, before this view. */}
+                <span className="font-mono text-xs text-muted">
+                  views: {icon.views} · downloads: {icon.downloads}
+                </span>
                 <Link href={`/icons/${icon.id}${variant === "fill" ? "?variant=fill" : ""}`} className="btn h-8">
                   Edit
                 </Link>

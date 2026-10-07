@@ -84,8 +84,6 @@ body {
 }
 .btn-fun-primary {
   @apply bg-foreground text-on-foreground;
-  /* A lighter tint of the main colour rather than a near-black shadow. */
-  --fun-shadow: color-mix(in srgb, var(--foreground) 40%, var(--background));
 }
 .input {
   @apply h-9 rounded-md border border-border bg-background px-3 text-sm outline-none transition-colors placeholder:text-muted focus:border-border-strong focus:ring-2 focus:ring-foreground/10;

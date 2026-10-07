@@ -11,9 +11,10 @@ import { Segmented } from "./Segmented";
 import { matchesQuery } from "@/lib/alts";
 import { canEdit } from "@/lib/editing";
 import { IconModal } from "./IconModal";
+import { recordDownload } from "@/app/actions";
 import { CheckIcon, CopyIcon, DownloadIcon } from "./UiIcons";
 
-type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number };
+type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
 
 export function IconGallery({ icons }: { icons: Item[] }) {
   const [style, setStyle] = useState<StyleId>("liquid-blob");
@@ -142,7 +143,10 @@ export function IconGallery({ icons }: { icons: Item[] }) {
                     <button
                       className="btn-icon size-7"
                       title="Download SVG"
-                      onClick={() => downloadFile(`${slugify(i.name)}-${variant}-${style}.svg`, svgFor(i))}
+                      onClick={() => {
+                        downloadFile(`${slugify(i.name)}-${variant}-${style}.svg`, svgFor(i));
+                        recordDownload(i.id).catch(() => {});
+                      }}
                     >
                       <DownloadIcon />
                     </button>

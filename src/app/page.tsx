@@ -35,7 +35,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   pixel: { icon: "space-invaders", text: "Square pixels, crisp and true to the grid." },
   rounded: { icon: "heart", text: "The same pixels, every corner gently softened.", fill: true },
   blob: { icon: "ghost", text: "Fully round corners, like little bubbles." },
-  liquid: { icon: "cat", text: "Pixels melt into each other." },
+  liquid: { icon: "bicycle", text: "Pixels melt into each other." },
   "liquid-blob": { icon: "eyes", text: "Melted pixels with fully round curves." },
   retro: { icon: "computer-retro", text: "Glowing scanlines, like an old CRT screen.", fill: true },
   stitch: { icon: "cactus", text: "Every pixel a cross, like embroidery." },
@@ -116,7 +116,7 @@ export default async function Home() {
           <div className="flex flex-col gap-3 rounded-xl bg-foreground p-6 text-on-foreground">
             <span className="opacity-70">{glyph("code", 24)}</span>
             <span className="font-display text-6xl">{kb} KB</span>
-            <span className="opacity-80">Every icon in one tiny file.</span>
+            <span className="opacity-80">Every icon in one tiny file</span>
           </div>
         )}
       </section>

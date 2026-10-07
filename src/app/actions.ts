@@ -60,6 +60,12 @@ export async function recordView(id: number): Promise<void> {
   await sql`UPDATE icons SET views = views + 1 WHERE id = ${id} AND status = 'validated'`;
 }
 
+/** Count one SVG download of an icon, whatever its style or variant. Open to everyone, like views. */
+export async function recordDownload(id: number): Promise<void> {
+  if (!Number.isInteger(id)) return;
+  await sql`UPDATE icons SET downloads = downloads + 1 WHERE id = ${id} AND status = 'validated'`;
+}
+
 /** Ask for an icon: just a name, to be drawn later. Open to everyone, unlike the other actions. */
 export async function requestIcon(name: string): Promise<void> {
   const n = cleanName(name);
