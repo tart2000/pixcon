@@ -18,6 +18,8 @@ const PREVIEW = [
   "chat", "headphones", "bicycle", "space-invaders", "robot", "ufo", "skull", "sparkles",
 ];
 
+const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+
 /** One showcase icon and a line of description per style. */
 const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boolean }> = {
   pixel: { icon: "space-invaders", text: "Square pixels, crisp and true to the grid." },
@@ -25,6 +27,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   blob: { icon: "ghost", text: "Fully round corners, like little bubbles." },
   liquid: { icon: "cat", text: "Pixels melt into each other." },
   "liquid-blob": { icon: "ufo", text: "Melted pixels with fully round curves." },
+  retro: { icon: "computer-retro", text: "Glowing scanlines, like an old CRT screen.", fill: true },
 };
 
 export default async function Home() {
@@ -100,7 +103,7 @@ export default async function Home() {
       </section>
 
       <section className="flex flex-col gap-8">
-        <SectionTitle eyebrow="The styles" title="One grid, five styles." />
+        <SectionTitle eyebrow="The styles" title={`One grid, ${NUMBERS[STYLES.length] ?? STYLES.length} styles.`} />
         {/* Same width as the figures above: three per row, the last row centred. */}
         <div className="flex flex-wrap justify-center gap-4">
           {STYLES.map((st) => {

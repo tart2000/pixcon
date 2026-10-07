@@ -6,6 +6,7 @@ export const STYLES = [
   { id: "blob", label: "Blob" },
   { id: "liquid", label: "Liquid" },
   { id: "liquid-blob", label: "Liquid Blob" },
+  { id: "retro", label: "Retro" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -242,6 +243,33 @@ function liquidPath(g: Grid, r = 3.5, c = 3.5): string {
   return d;
 }
 
+/**
+ * Retro style: a CRT look. Each horizontal run of pixels becomes two scanlines, one per
+ * half-pixel row, sitting at its bottom: pills a quarter of a pixel tall, fully rounded.
+ */
+function retroPath(g: Grid): string {
+  const h = U / 4;
+  const r = h / 2;
+  let d = "";
+  for (let y = 0; y < GRID; y++) {
+    let x = 0;
+    while (x < GRID) {
+      if (!on(g, x, y)) {
+        x++;
+        continue;
+      }
+      const start = x;
+      while (on(g, x, y)) x++;
+      const x0 = start * U;
+      const x1 = x * U;
+      for (const b of [y * U + U / 2, (y + 1) * U]) {
+        d += `M${x0 + r} ${b}A${r} ${r} 0 0 1 ${x0 + r} ${b - h}H${x1 - r}A${r} ${r} 0 0 1 ${x1 - r} ${b}Z`;
+      }
+    }
+  }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -254,6 +282,8 @@ export function iconPath(g: Grid, style: StyleId): string {
       return liquidPath(g, U / 2, U / 2);
     case "blob":
       return blobPath(g);
+    case "retro":
+      return retroPath(g);
   }
 }
 
