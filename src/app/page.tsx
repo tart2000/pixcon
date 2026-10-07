@@ -9,6 +9,7 @@ import { LibraryPreview } from "@/components/home/LibraryPreview";
 import { CodeBlock } from "@/components/CodeBlock";
 import { KIT_SCRIPT } from "@/lib/kit";
 import { kitSizeKB } from "@/lib/kitSize";
+import { canEdit } from "@/lib/editing";
 
 /** Icons shown in the library preview, when they exist. */
 const PREVIEW = [
@@ -22,10 +23,10 @@ const PREVIEW = [
 const FAMILIES = [
   { tag: "retro", label: "Retro", icons: ["computer-retro", "floppy-disk", "game-console-handheld", "space-invaders", "ghost", "mushroom-retro"] },
   { tag: "outdoors", label: "Outdoors", icons: ["tent", "mountains", "compass", "binoculars", "tree", "table-picnic"] },
-  { tag: "animal", label: "Animals", icons: ["cat", "dog", "owl", "elephant", "rabbit", "snail"] },
+  { tag: "animal", label: "Animals", icons: ["cat", "dog-face", "owl", "elephant", "rabbit", "snail"] },
   { tag: "food", label: "Food", icons: ["candy", "barbecue", "icecream-cone", "cherries", "coffee", "cheese"] },
   { tag: "game", label: "Games", icons: ["dice-five", "gamepad", "joystick", "bowling-ball", "trophy", "axe-battle"] },
-  { tag: "transport", label: "Transport", icons: ["airplane", "bicycle", "bus", "truck", "scooter", "helicopter"] },
+  { tag: "transport", label: "Transport", icons: ["airplane", "bicycle", "bus", "truck-side", "scooter", "helicopter"] },
 ];
 
 const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
@@ -53,11 +54,16 @@ export default async function Home() {
   };
   // Top up with other icons if some aren't drawn yet, so the grid always ends on a full row.
   const kb = kitSizeKB();
-  const families = FAMILIES.map((f) => ({
-    ...f,
-    total: icons.filter((i) => i.alts.includes(f.tag)).length,
-    picks: f.icons.flatMap((n) => byName.get(n) ?? []),
-  }));
+  const families = FAMILIES.map((f) => {
+    // A renamed or unvalidated icon just drops out of the row; say so while editing locally.
+    const missing = f.icons.filter((n) => !byName.has(n));
+    if (canEdit && missing.length) console.warn(`[home] Family “${f.label}” can't find: ${missing.join(", ")}`);
+    return {
+      ...f,
+      total: icons.filter((i) => i.alts.includes(f.tag)).length,
+      picks: f.icons.flatMap((n) => byName.get(n) ?? []),
+    };
+  });
   const preview = [
     ...PREVIEW.flatMap((n) => byName.get(n) ?? []),
     ...[...byName.values()].filter((i) => !PREVIEW.includes(i.name)),
