@@ -38,7 +38,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   liquid: { icon: "cat", text: "Pixels melt into each other." },
   "liquid-blob": { icon: "eyes", text: "Melted pixels with fully round curves." },
   retro: { icon: "computer-retro", text: "Glowing scanlines, like an old CRT screen.", fill: true },
-  stitch: { icon: "flower", text: "Every pixel a cross, like embroidery." },
+  stitch: { icon: "cactus", text: "Every pixel a cross, like embroidery." },
   knit: { icon: "hat-winter", text: "Rows of little chevrons, like a cosy jumper." },
   dots: { icon: "dice-six", text: "Four round dots per pixel, like an LED board." },
 };
