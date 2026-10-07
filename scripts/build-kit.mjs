@@ -15,7 +15,7 @@ await build({
   format: "iife",
   target: "es2018",
   define: { __PIXCON_ICONS__: JSON.stringify(icons) },
-  banner: { js: `/*! Pixcon kit · ${rows.length} icons · https://tart2000.github.io/pixcon/ */` },
+  banner: { js: `/*! Pixcon kit · ${rows.length} icons · https://pixcon.vercel.app/ */` },
   logLevel: "warning",
 });
 console.log(`kit ready: ${rows.length} icons → public/kit/pixcon.js`);

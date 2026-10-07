@@ -31,8 +31,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
 };
 
 export default async function Home() {
-  // Live data per request; the static GitHub Pages export reads it once at build time.
-  if (!process.env.STATIC_EXPORT) await connection();
+  await connection();
   const icons = await listIcons("validated");
   const byName = new Map(icons.map((i) => [i.name, { name: i.name, pixels: i.pixels, fill: i.pixels_fill }]));
   const glyph = (name: string, size = 20) => {

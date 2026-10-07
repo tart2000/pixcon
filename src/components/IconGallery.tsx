@@ -172,7 +172,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
 }
 
 // The URL is read through our own store rather than useSearchParams, which would need a
-// Suspense boundary and leave the gallery out of the static export's HTML.
+// Suspense boundary around the gallery.
 const URL_CHANGE = "pixcon:url";
 function subscribeUrl(cb: () => void) {
   window.addEventListener("popstate", cb);

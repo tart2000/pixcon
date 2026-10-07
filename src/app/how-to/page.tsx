@@ -16,7 +16,7 @@ export default function GettingStartedPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-12">
       {/* Loads the real kit so the examples below are drawn by it. */}
-      <Script src={`${process.env.BASE_PATH}/kit/pixcon.js`} />
+      <Script src="/kit/pixcon.js" />
 
       <header className="flex flex-col gap-3">
         <h1 className="font-display text-5xl">How to</h1>

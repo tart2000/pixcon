@@ -5,8 +5,7 @@ import { IconGallery } from "@/components/IconGallery";
 export const metadata = { title: "Icons · Pixcon" };
 
 export default async function IconsPage() {
-  // Live data per request; the static GitHub Pages export reads it once at build time.
-  if (!process.env.STATIC_EXPORT) await connection();
+  await connection();
   const icons = (await listIcons("validated")).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
