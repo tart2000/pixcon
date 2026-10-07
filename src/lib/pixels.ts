@@ -33,6 +33,10 @@ export const flipH = (g: Grid): Grid =>
 export const flipV = (g: Grid): Grid =>
   g.map((_, i) => g[(GRID - 1 - Math.floor(i / GRID)) * GRID + (i % GRID)]);
 
+/** Rotate a quarter turn clockwise: the left column becomes the top row. */
+export const rotate = (g: Grid): Grid =>
+  g.map((_, i) => g[(GRID - 1 - (i % GRID)) * GRID + Math.floor(i / GRID)]);
+
 /** Shift the drawing by (dx, dy); pixels pushed off the edge are lost. */
 export const shift = (g: Grid, dx: number, dy: number): Grid =>
   g.map((_, i) => {

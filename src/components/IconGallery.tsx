@@ -12,7 +12,7 @@ import { matchesQuery } from "@/lib/alts";
 import { canEdit } from "@/lib/editing";
 import { IconModal } from "./IconModal";
 import { recordDownload } from "@/app/actions";
-import { CheckIcon, CopyIcon, DownloadIcon } from "./UiIcons";
+import { CheckIcon, CloseIcon, CopyIcon, DownloadIcon } from "./UiIcons";
 
 type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
 
@@ -31,6 +31,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   const setQuery = (q: string) => setUrl("replace", urlWith({ q }));
   const filtered = useMemo(() => icons.filter((i) => matchesQuery(i, query)), [icons, query]);
   const pushed = useRef(false);
+  const searchRef = useRef<HTMLInputElement>(null);
   // Browse the filtered list, unless a shared link points outside it.
   const browsing = filtered.some((i) => i.name === openName) ? filtered : icons;
   const openIndex = browsing.findIndex((i) => i.name === openName);
@@ -67,12 +68,29 @@ export function IconGallery({ icons }: { icons: Item[] }) {
           A full-width white band that starts right under the header (cancelling main's top padding) and sticks there. */}
       <div className="sticky top-14 z-[5] -mt-8 ml-[calc(50%-50vw)] w-screen border-b border-border bg-background sm:-mt-10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-4 sm:px-6">
-        <input
-          className="input h-12 w-full px-4 text-base"
-          placeholder={`Search ${icons.length} icons…`}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            ref={searchRef}
+            className="input h-12 w-full px-4 pr-12 text-base"
+            placeholder={`Search ${icons.length} icons…`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && setQuery("")}
+          />
+          {query && (
+            <button
+              className="btn-icon absolute top-1/2 right-2 -translate-y-1/2"
+              title="Clear search (Esc)"
+              aria-label="Clear search"
+              onClick={() => {
+                setQuery("");
+                searchRef.current?.focus();
+              }}
+            >
+              <CloseIcon />
+            </button>
+          )}
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
           <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />

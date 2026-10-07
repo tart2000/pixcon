@@ -11,6 +11,7 @@ import {
   encode,
   flipH,
   flipV,
+  rotate,
   invert,
   shift,
   type Grid,
@@ -326,6 +327,9 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
           <button className="btn-icon" onClick={() => commit(flipV)} disabled={!count} title="Flip vertically">
             <FlipIcon className="rotate-90" />
           </button>
+          <button className="btn-icon" onClick={() => commit(rotate)} disabled={!count} title="Rotate 90° clockwise">
+            <RotateIcon />
+          </button>
           <button className="btn-icon" onClick={() => commit(emptyGrid())} disabled={!count} title="Clear">
             <TrashIcon />
           </button>
@@ -530,6 +534,12 @@ const UndoIcon = ({ className }: { className?: string }) => (
   <svg {...ico} className={className}>
     <path d="M9 14 4 9l5-5" />
     <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+  </svg>
+);
+const RotateIcon = () => (
+  <svg {...ico}>
+    <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+    <path d="M21 3v5h-5" />
   </svg>
 );
 const FlipIcon = ({ className }: { className?: string }) => (
