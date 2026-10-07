@@ -92,7 +92,7 @@ export default async function Home() {
         {/* The kit's weight, measured on the built file: the highlight of the row. */}
         {kb && (
           <div className="flex flex-col gap-3 rounded-xl bg-foreground p-6 text-on-foreground">
-            <span className="opacity-70">{glyph("lightning", 24)}</span>
+            <span className="opacity-70">{glyph("code", 24)}</span>
             <span className="font-display text-6xl">{kb} KB</span>
             <span className="opacity-80">The whole kit, gzipped. Every icon in one tiny file.</span>
           </div>
