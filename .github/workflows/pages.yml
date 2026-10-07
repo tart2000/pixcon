@@ -20,8 +20,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  # One job, so the build can read DATABASE_URL from the github-pages environment secrets.
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -33,7 +37,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "::error::Missing DATABASE_URL secret (Settings → Secrets and variables → Actions)."
+            echo "::error::Missing DATABASE_URL secret (Settings → Environments → github-pages, or a repository secret)."
             exit 1
           fi
       - run: npm ci
@@ -44,13 +48,5 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
