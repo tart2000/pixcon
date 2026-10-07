@@ -59,7 +59,7 @@ export default function GettingStartedPage() {
       <Step n={3} title="Pick a style and a variant">
         <div className="overflow-hidden rounded-lg border border-border bg-background">
           <table className="w-full text-left text-sm">
-            <thead className="bg-subtle text-muted">
+            <thead className="bg-foreground text-on-foreground/75">
               <tr>
                 <th className="px-4 py-2 font-normal">Class</th>
                 <th className="px-4 py-2 font-normal">Regular</th>

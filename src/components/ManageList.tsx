@@ -115,7 +115,7 @@ export function ManageList({ icons }: { icons: Item[] }) {
 
       <div className="overflow-hidden rounded-lg border border-border bg-background">
         <div
-          className={`hidden items-center gap-4 border-b border-border bg-subtle px-4 py-2 text-xs text-muted sm:grid ${canEdit ? "grid-cols-[88px_1fr_160px_120px_80px]" : "grid-cols-[88px_1fr_160px_120px]"}`}
+          className={`hidden items-center gap-4 bg-foreground px-4 py-2 text-xs text-on-foreground/75 sm:grid ${canEdit ? "grid-cols-[88px_1fr_160px_120px_80px]" : "grid-cols-[88px_1fr_160px_120px]"}`}
         >
           <span>Regular · Fill</span>
           <span>Name</span>
