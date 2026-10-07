@@ -15,6 +15,9 @@ export async function requestIcon(name: string): Promise<void> {
   );
 }
 
+/** No server to count views on in the static export. */
+export async function recordView(): Promise<void> {}
+
 export const setIconStatus: (id: number, status: Status) => Promise<void> = async () => {
   throw new Error("Editing is disabled");
 };

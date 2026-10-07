@@ -7,6 +7,7 @@ import { STYLES, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg"
 import { useIconColor } from "@/lib/iconColor";
 import { canEdit } from "@/lib/editing";
 import { kitTag } from "@/lib/kit";
+import { recordView } from "@/app/actions";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
@@ -50,6 +51,14 @@ export function IconModal({
     const d = ref.current;
     if (d && !d.open) d.showModal();
   }, []);
+
+  // One view per icon shown, arrows included. The ref keeps dev's double-run effects from counting twice.
+  const counted = useRef<number | null>(null);
+  useEffect(() => {
+    if (counted.current === icon.id) return;
+    counted.current = icon.id;
+    recordView(icon.id).catch(() => {});
+  }, [icon.id]);
 
   const step = (delta: number) => onIndex((index + delta + icons.length) % icons.length);
 

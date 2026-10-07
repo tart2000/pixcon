@@ -54,6 +54,12 @@ export async function isNameTaken(name: string, except?: number): Promise<boolea
   return !!row;
 }
 
+/** Count one view of an icon's popup. Open to everyone; no revalidation, it's only a stat. */
+export async function recordView(id: number): Promise<void> {
+  if (!Number.isInteger(id)) return;
+  await sql`UPDATE icons SET views = views + 1 WHERE id = ${id} AND status = 'validated'`;
+}
+
 /** Ask for an icon: just a name, to be drawn later. Open to everyone, unlike the other actions. */
 export async function requestIcon(name: string): Promise<void> {
   const n = cleanName(name);
