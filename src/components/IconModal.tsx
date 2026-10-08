@@ -1,9 +1,10 @@
 "use client";
 
+import { StyleSelect } from "./StyleSelect";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { GRID_LINES, STYLES, VIEWBOX, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { GRID_LINES, VIEWBOX, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { canEdit } from "@/lib/editing";
 import { kitTag } from "@/lib/kit";
@@ -140,10 +141,10 @@ export function IconModal({
 
           <div className="flex min-w-0 flex-col gap-4">
             <div className="flex flex-wrap items-center gap-2">
+              <StyleSelect value={style} onChange={setStyle} />
               <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
               <ColorPicker />
             </div>
-            <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
             {/* Code: two folder tabs on a panel holding the snippet and its actions. */}
             <div>
               <div role="tablist" aria-label="Code format" className="flex">

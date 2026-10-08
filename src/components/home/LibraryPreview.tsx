@@ -1,9 +1,10 @@
 "use client";
 
+import { StyleSelect } from "../StyleSelect";
 import Link from "next/link";
 import { useState } from "react";
 import { VARIANTS, type Variant } from "@/lib/pixels";
-import { STYLES, type StyleId } from "@/lib/svg";
+import { type StyleId } from "@/lib/svg";
 import { ColorPicker } from "../ColorPicker";
 import { IconGlyph } from "../IconGlyph";
 import { Segmented } from "../Segmented";
@@ -18,8 +19,8 @@ export function LibraryPreview({ icons, total }: { icons: Item[]; total: number 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-background p-4 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
+        <StyleSelect value={style} onChange={setStyle} />
         <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
-        <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
         {/* The picked colour themes the whole site, these icons included. */}
         <div className="sm:ml-auto">
           <ColorPicker />

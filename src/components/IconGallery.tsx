@@ -1,9 +1,10 @@
 "use client";
 
+import { StyleSelect } from "./StyleSelect";
 import Link from "next/link";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { STYLES, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
@@ -92,8 +93,8 @@ export function IconGallery({ icons }: { icons: Item[] }) {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <StyleSelect value={style} onChange={setStyle} />
           <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
-          <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
           <ColorPicker align="left" />
           <label
             className="flex h-9 items-center gap-3 rounded-md border border-border bg-background px-3 sm:ml-auto"
