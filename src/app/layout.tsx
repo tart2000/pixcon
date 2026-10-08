@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono, Londrina_Solid } from "next/font/google";
 import "./globals.css";
 import { ThemeSync } from "@/components/ThemeSync";
+import { MobileMenu } from "@/components/MobileMenu";
 import { THEME_SCRIPT } from "@/lib/palette";
 import { canEdit } from "@/lib/editing";
 import { STYLES } from "@/lib/svg";
@@ -28,28 +29,36 @@ const DESCRIPTION = `Open-source 11×11 pixel icons with personality, in ${STYLE
 
 // The share image comes from app/opengraph-image.jpg and app/twitter-image.jpg.
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pixcon.vercel.app"),
-  title: { default: "Pixcon · Pixel icons with personality", template: "%s · Pixcon" },
+  metadataBase: new URL("https://www.pixicons.io"),
+  title: { default: "Pixicons · Pixel icons with personality", template: "%s · Pixicons" },
   description: DESCRIPTION,
-  applicationName: "Pixcon",
+  applicationName: "Pixicons",
   keywords: ["pixel icons", "icon library", "open source icons", "SVG icons", "pixel art", "icon font", "11x11"],
   authors: [{ name: "POC studio", url: "https://pocstudio.fr" }],
   creator: "POC studio",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    siteName: "Pixcon",
+    siteName: "Pixicons",
     url: "/",
-    title: "Pixcon · Pixel icons with personality",
+    title: "Pixicons · Pixel icons with personality",
     description: DESCRIPTION,
     locale: "en",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pixcon · Pixel icons with personality",
+    title: "Pixicons · Pixel icons with personality",
     description: DESCRIPTION,
   },
 };
+
+/** Header links: inline from `sm` up (the logo stands for Home), in the burger menu below. */
+const NAV = [
+  { href: "/", label: "Home" },
+  { href: "/icons", label: "Icons" },
+  { href: "/how-to", label: "How to" },
+  ...(canEdit ? [{ href: "/manage", label: "Manage" }] : []),
+];
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -68,29 +77,29 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="flex h-14 items-center justify-between px-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2 font-display text-xl">
               <Logo />
-              Pixcon
+              Pixicons
             </Link>
             <nav className="flex items-center gap-1">
-              <Link href="/icons" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
-                Icons
-              </Link>
-              <Link href="/how-to" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
-                How to
-              </Link>
-              {canEdit && (
-                <Link href="/manage" className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block">
-                  Manage
+              {NAV.filter((l) => l.href !== "/").map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="hidden rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground sm:block"
+                >
+                  {l.label}
                 </Link>
-              )}
+              ))}
               {canEdit ? (
                 <Link href="/new" className="btn-primary ml-2 h-8 px-3 whitespace-nowrap">
                   New icon
                 </Link>
               ) : (
-                <Link href="/manage" className="btn-primary ml-2 h-8 px-3 whitespace-nowrap">
+                // On phones it moves into the burger menu.
+                <Link href="/manage" className="btn-primary ml-2 hidden h-8 px-3 whitespace-nowrap sm:inline-flex">
                   Request an icon
                 </Link>
               )}
+              <MobileMenu links={NAV} cta={canEdit ? undefined : { href: "/manage", label: "Request an icon" }} />
             </nav>
           </div>
         </header>

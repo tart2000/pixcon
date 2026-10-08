@@ -1,7 +1,7 @@
 /**
  * Pixcon kit: renders `<i class="px px-heart px-blob px-fill"></i>` as inline SVG.
  * Icons ship as 11×11 grids (hex) and are drawn here with the same engine as the site.
- * Built into public/kit/pixcon.js by scripts/build-kit.mjs, which injects the icons.
+ * Built into public/kit/pixicons.js by scripts/build-kit.mjs, which injects the icons.
  */
 import { VARIANTS, fromHex, type Variant } from "@/lib/pixels";
 import { RESERVED_NAMES } from "@/lib/reserved";
@@ -15,7 +15,7 @@ const STYLE_IDS = new Set<string>(STYLES.map((s) => s.id));
 const VARIANT_IDS = new Set<string>(VARIANTS.map((v) => v.id));
 const RESERVED = new Set(RESERVED_NAMES);
 
-// Page-wide defaults: <script src=".../pixcon.js" data-style="blob" data-variant="fill">
+// Page-wide defaults: <script src=".../pixicons.js" data-style="blob" data-variant="fill">
 const script = document.currentScript as HTMLScriptElement | null;
 const pick = <T extends string>(value: string | undefined, ids: Set<string>, fallback: T) =>
   (value && ids.has(value) ? value : fallback) as T;

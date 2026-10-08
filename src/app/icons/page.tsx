@@ -5,7 +5,7 @@ import { IconGallery } from "@/components/IconGallery";
 
 export const metadata = pageMeta(
   "Icons",
-  "Browse every Pixcon icon: search by name or tag, pick a style and a colour, then copy the HTML or the SVG.",
+  "Browse every icon in Pixicons: search by name or tag, pick a style and a colour, then copy the HTML or the SVG.",
   "/icons",
 );
 

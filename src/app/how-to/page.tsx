@@ -9,7 +9,7 @@ import { STYLES } from "@/lib/svg";
 
 export const metadata = pageMeta(
   "How to",
-  "Add the Pixcon script to your page and write icons as plain HTML, or download them as SVG files.",
+  "Add the Pixicons script to your page and write icons as plain HTML, or download them as SVG files.",
   "/how-to",
 );
 
@@ -21,12 +21,12 @@ export default function GettingStartedPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-12">
       {/* Loads the real kit so the examples below are drawn by it. */}
-      <Script src="/kit/pixcon.js" />
+      <Script src="/kit/pixicons.js" />
 
       <header className="flex flex-col gap-3">
         <h1 className="font-display text-5xl">How to</h1>
         <p className="text-lg text-muted">
-          Pixcon ships as one small script{kb ? ` (${kb} KB)` : ""} with every icon included. Add it once, then write
+          Pixicons ships as one small script{kb ? ` (${kb} KB)` : ""} with every icon included. Add it once, then write
           icons as plain HTML.
         </p>
       </header>
