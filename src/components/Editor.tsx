@@ -17,7 +17,7 @@ import {
   type Grid,
   type Variant,
 } from "@/lib/pixels";
-import { STYLES, VIEWBOX, downloadFile, iconPath, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { GRID_LINES, STYLES, VIEWBOX, downloadFile, iconPath, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
@@ -354,7 +354,7 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
             <rect width="100%" height="100%" className="fill-background" />
             <rect x={center * 10} width={10} height="100%" className="fill-subtle" />
             <rect y={center * 10} width="100%" height={10} className="fill-subtle" />
-            <path d={gridLines} className="stroke-border" strokeWidth={0.15} fill="none" />
+            <path d={GRID_LINES} className="stroke-border" strokeWidth={0.15} fill="none" />
             <path d={iconPath(grid, style)} className="fill-foreground" style={color ? { fill: color } : undefined} />
           </svg>
         </div>
@@ -479,7 +479,6 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
 }
 
 /** Cells on the line between two cell indices (Bresenham). */
-const gridLines = Array.from({ length: GRID - 1 }, (_, i) => `M${(i + 1) * 10} 0V${GRID * 10}M0 ${(i + 1) * 10}H${GRID * 10}`).join("");
 
 function line(from: number, to: number): number[] {
   let x0 = from % GRID;

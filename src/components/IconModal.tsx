@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { STYLES, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { GRID_LINES, STYLES, VIEWBOX, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { canEdit } from "@/lib/editing";
 import { kitTag } from "@/lib/kit";
@@ -118,7 +118,18 @@ export function IconModal({
         <div className="grid gap-6 md:grid-cols-[1fr_1.1fr]">
           <div className="flex flex-col rounded-lg border border-border">
             <div className="flex flex-1 items-center justify-center py-10">
-              <IconGlyph pixels={pixels} style={style} size={176} color={color} />
+              {/* Hovering the icon reveals the 11×11 grid it's drawn on, faintly, behind it. */}
+              <div className="group relative">
+                <svg
+                  viewBox={VIEWBOX}
+                  className="pointer-events-none absolute inset-0 size-full opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  aria-hidden
+                >
+                  <rect x="0" y="0" width="110" height="110" className="fill-none stroke-border" strokeWidth={0.6} />
+                  <path d={GRID_LINES} className="fill-none stroke-border" strokeWidth={0.6} />
+                </svg>
+                <IconGlyph pixels={pixels} style={style} size={176} color={color} className="relative" />
+              </div>
             </div>
             <div className="flex items-end justify-center gap-5 border-t border-border py-4">
               {[16, 24, 32, 48].map((size) => (
@@ -133,44 +144,72 @@ export function IconModal({
               <ColorPicker />
             </div>
             <Segmented label="Style" options={STYLES} value={style} onChange={setStyle} />
-            <div className="flex flex-col gap-2">
-              <Segmented
-                label="Code"
-                options={[
-                  { id: "html", label: "HTML" },
-                  { id: "svg", label: "SVG" },
-                ]}
-                value={format}
-                onChange={setFormat}
-              />
-              <pre className="max-h-48 overflow-auto rounded-lg bg-foreground p-3 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap text-on-foreground">
-                {code}
-              </pre>
-              {format === "html" && (
-                <p className="text-xs text-muted">
-                  Needs the Pixicons kit on the page,{" "}
-                  <Link href="/how-to" className="text-foreground underline underline-offset-2">
-                    see How to
-                  </Link>
-                  .
-                </p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <button className="btn-primary flex-1" onClick={() => copy("code", code)}>
-                {copied === "code" ? <CheckIcon /> : <CopyIcon />}
-                {copied === "code" ? "Copied" : format === "html" ? "Copy HTML" : "Copy SVG"}
-              </button>
-              <button
-                className="btn flex-1"
-                onClick={() => {
-                  downloadFile(`${slugify(icon.name)}-${variant}-${style}.svg`, svg);
-                  recordDownload(icon.id).catch(() => {});
-                }}
+            {/* Code: two folder tabs on a panel holding the snippet and its actions. */}
+            <div>
+              <div role="tablist" aria-label="Code format" className="flex">
+                {(["html", "svg"] as const).map((f) => (
+                  <button
+                    key={f}
+                    role="tab"
+                    aria-selected={format === f}
+                    onClick={() => setFormat(f)}
+                    className={`relative -mb-px rounded-t-lg border px-5 py-2 text-xs font-semibold tracking-wider uppercase transition-colors ${
+                      format === f
+                        ? "z-10 border-border border-b-background bg-background text-foreground"
+                        : "border-transparent text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+              <div
+                role="tabpanel"
+                className="flex flex-col gap-4 rounded-lg rounded-tl-none border border-border bg-background p-4"
               >
-                <DownloadIcon />
-                Download SVG
-              </button>
+                {/* Code style, like the other snippets on the site: inverted on the main colour. */}
+                <pre
+                  className={`overflow-auto rounded-lg bg-foreground p-4 font-mono leading-relaxed break-all whitespace-pre-wrap ${
+                    format === "html" ? "text-sm text-on-foreground" : "max-h-40 text-xs text-on-foreground/80"
+                  }`}
+                >
+                  {format === "html" ? (
+                    <>
+                      <span className="text-on-foreground/60">&lt;i class=&quot;</span>
+                      <span className="font-semibold">{kitTag(icon.name, style, variant).match(/class="([^"]*)"/)![1]}</span>
+                      <span className="text-on-foreground/60">&quot;&gt;&lt;/i&gt;</span>
+                    </>
+                  ) : (
+                    svg
+                  )}
+                </pre>
+                <div className="flex gap-2">
+                  <button className="btn-primary flex-1" onClick={() => copy("code", code)}>
+                    {copied === "code" ? <CheckIcon /> : <CopyIcon />}
+                    {copied === "code" ? "Copied" : format === "html" ? "Copy HTML" : "Copy SVG"}
+                  </button>
+                  {format === "svg" && (
+                    <button
+                      className="btn flex-1"
+                      onClick={() => {
+                        downloadFile(`${slugify(icon.name)}-${variant}-${style}.svg`, svg);
+                        recordDownload(icon.id).catch(() => {});
+                      }}
+                    >
+                      <DownloadIcon />
+                      Download SVG
+                    </button>
+                  )}
+                </div>
+                {format === "html" && (
+                  <p className="-mt-1 text-xs text-muted">
+                    Load the Pixicons kit on your page first ·{" "}
+                    <Link href="/how-to" className="text-foreground underline underline-offset-2">
+                      How to
+                    </Link>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

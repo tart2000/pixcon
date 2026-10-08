@@ -384,6 +384,9 @@ export function iconSvg(g: Grid, style: StyleId, opts: { size?: number; color?: 
 
 export const VIEWBOX = `0 0 ${SIZE} ${SIZE}`;
 
+/** The inner lines of the 11×11 grid, in viewBox units. */
+export const GRID_LINES = Array.from({ length: GRID - 1 }, (_, i) => `M${(i + 1) * U} 0V${SIZE}M0 ${(i + 1) * U}H${SIZE}`).join("");
+
 export const slugify = (name: string) =>
   name
     .toLowerCase()
