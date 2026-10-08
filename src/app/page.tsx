@@ -26,7 +26,9 @@ const FAMILIES = [
   { tag: "animal", label: "Animals", icons: ["cat", "dog-face", "owl", "elephant", "rabbit", "snail"] },
   { tag: "food", label: "Food", icons: ["candy", "barbecue", "icecream-cone", "cherries", "coffee", "cheese"] },
   { tag: "game", label: "Games", icons: ["dice-five", "gamepad", "joystick", "bowling-ball", "trophy", "axe-battle"] },
-  { tag: "transport", label: "Transport", icons: ["airplane", "bicycle", "bus", "truck-side", "scooter", "helicopter"] },
+  { tag: "transport", label: "Transport", icons: ["roller", "bicycle", "bus", "truck-side", "scooter", "helicopter"] },
+  { tag: "ui", label: "UI", icons: ["arrows-clockwise", "toggle-on", "cursor-text", "funnel", "download", "info-circle"] },
+  { tag: "human", label: "Human", icons: ["scout", "person-biking", "person", "eyes-frown", "hand-horns", "thumbs-up"] },
 ];
 
 const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
@@ -179,7 +181,7 @@ export default async function Home() {
                 ))}
               </div>
               <Link href={`/icons?q=${encodeURIComponent(f.tag)}`} className="btn w-full">
-                See all {f.label.toLowerCase()} →
+                See all {f.label === f.label.toUpperCase() ? f.label : f.label.toLowerCase()} →
               </Link>
             </li>
           ))}
