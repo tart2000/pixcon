@@ -107,7 +107,8 @@ export function IconGallery({ icons }: { icons: Item[] }) {
               step={4}
               value={size}
               onChange={(e) => setSize(Number(e.target.value))}
-              className="w-28 accent-foreground"
+              className="range w-28"
+              style={{ "--fill": `${((size - 16) / (192 - 16)) * 100}%` } as React.CSSProperties}
               aria-label="Preview size"
             />
             <span className="w-11 text-right font-mono text-xs text-muted">{size}px</span>

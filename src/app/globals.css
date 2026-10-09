@@ -110,3 +110,54 @@ body {
     --fade: radial-gradient(ellipse 95% 42% at 50% 50%, transparent 45%, black 100%);
   }
 }
+
+/* Flat slider matching the other controls: a thin filled track (main colour up to --fill) and a plain round thumb. */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--foreground) var(--fill, 0%), var(--border) var(--fill, 0%));
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: none;
+  border-radius: 999px;
+  background: var(--foreground);
+}
+.range::-moz-range-track {
+  height: 4px;
+  border: none;
+  border-radius: 999px;
+  background: var(--border);
+}
+.range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--foreground);
+}
+.range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--foreground);
+}
+.range:focus-visible {
+  outline: none;
+}
+.range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+.range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 20%, transparent);
+}
