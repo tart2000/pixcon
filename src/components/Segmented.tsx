@@ -1,6 +1,6 @@
 "use client";
 
-/** Vercel-style segmented control. */
+/** Vercel-style segmented control; hovers like `.btn` (stronger border, tinted option). */
 export function Segmented<T extends string>({
   options,
   value,
@@ -14,7 +14,7 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div
-      className="inline-flex max-w-full flex-wrap gap-0.5 rounded-md border border-border bg-background p-[3px]"
+      className="inline-flex max-w-full flex-wrap gap-0.5 rounded-md border border-border bg-background p-[3px] transition-colors hover:border-border-strong"
       role="radiogroup"
       aria-label={label}
     >
@@ -25,7 +25,7 @@ export function Segmented<T extends string>({
           aria-checked={value === o.id}
           onClick={() => onChange(o.id)}
           className={`h-7 shrink-0 rounded px-2.5 text-sm transition-colors ${
-            value === o.id ? "bg-foreground text-on-foreground" : "text-muted hover:text-foreground"
+            value === o.id ? "bg-foreground text-on-foreground" : "text-muted hover:bg-subtle hover:text-foreground"
           }`}
         >
           {o.label}
