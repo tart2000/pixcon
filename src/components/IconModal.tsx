@@ -229,9 +229,9 @@ export function IconModal({
                     )}
                   </pre>
                 )}
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <button
-                    className="btn-primary flex-1"
+                    className="btn-primary sm:flex-1"
                     onClick={() => (format === "png" ? copyPng() : copy("code", code))}
                   >
                     {copied === "code" ? <CheckIcon /> : <CopyIcon />}
@@ -239,7 +239,7 @@ export function IconModal({
                   </button>
                   {format !== "html" && (
                     <button
-                      className="btn flex-1"
+                      className="btn sm:flex-1"
                       disabled={format === "png" && !pngReady}
                       onClick={() => (format === "png" ? pngReady && download("png", pngReady.blob) : download("svg", svg))}
                     >
