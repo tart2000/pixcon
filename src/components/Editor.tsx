@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { createIcon, deleteIcon, duplicateIcon, isNameTaken, updateIcon } from "@/app/actions";
+import { createIcon, deleteIcon, duplicateIcon, nameOwner, updateIcon } from "@/app/actions";
 import {
   GRID,
   VARIANTS,
@@ -92,20 +92,21 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
 
   // Names are unique slugs: check availability while typing so a clash shows before saving.
   const slug = toSlug(name);
-  const [takenSlug, setTakenSlug] = useState<string | null>(null);
+  const [owner, setOwner] = useState<{ slug: string; by: "icon" | "request" } | null>(null);
   useEffect(() => {
     if (!slug || slug === saved.name) return;
     let live = true;
     const t = setTimeout(async () => {
-      const taken = await isNameTaken(slug, icon?.id);
-      if (live) setTakenSlug(taken ? slug : null);
+      const by = await nameOwner(slug, icon?.id);
+      if (live) setOwner(by ? { slug, by } : null);
     }, 250);
     return () => {
       live = false;
       clearTimeout(t);
     };
   }, [slug, saved.name, icon?.id]);
-  const nameTaken = !!slug && slug !== saved.name && takenSlug === slug;
+  const ownedBy = slug && slug !== saved.name && owner?.slug === slug ? owner.by : null;
+  const nameTaken = ownedBy === "icon";
   const nameReserved = slug ? reservedReason(slug) : null;
   const nameOk = !!slug && !nameTaken && !nameReserved;
 
@@ -382,6 +383,9 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
           />
           {nameTaken && (
             <p className="text-sm text-red-600 dark:text-red-400">“{slug}” is already taken by another icon.</p>
+          )}
+          {ownedBy === "request" && (
+            <p className="text-sm text-muted">“{slug}” was requested: saving fills that request.</p>
           )}
           {nameReserved && (
             <p className="text-sm text-red-600 dark:text-red-400">

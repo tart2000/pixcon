@@ -26,6 +26,19 @@ async function assertFreeName(name: string, except?: number) {
   if (row) throw new Error(`An icon named “${name}” already exists`);
 }
 
+/**
+ * A request still waiting to be drawn (nothing drawn yet) only holds its name:
+ * an icon saved under that name takes its place, keeping the request's alts.
+ */
+async function findRequest(name: string, except?: number): Promise<{ id: number; alts: string[] } | undefined> {
+  const [row] = await sql`
+    SELECT id, alts FROM icons
+    WHERE name = ${name} AND id IS DISTINCT FROM ${except ?? null}
+      AND status = 'requested' AND pixels = ${EMPTY} AND (pixels_fill IS NULL OR pixels_fill = ${EMPTY})
+  `;
+  return row as { id: number; alts: string[] } | undefined;
+}
+
 /** `fill` is null when the icon has no fill variant yet. */
 function clean(name: string, pixels: string, fill: string | null, status: Status) {
   if (!isValidPixels(pixels) || (fill !== null && !isValidPixels(fill))) throw new Error("Invalid pixels");
@@ -60,12 +73,13 @@ async function kitFields(id: number): Promise<KitFields | undefined> {
   return row as KitFields | undefined;
 }
 
-/** Live check for the editor: is this slug used by another icon? */
-export async function isNameTaken(name: string, except?: number): Promise<boolean> {
+/** Live check for the editor: is this slug free, held by an empty request (saving fills it), or used by another icon? */
+export async function nameOwner(name: string, except?: number): Promise<"icon" | "request" | null> {
   const n = toSlug(name);
-  if (!n) return false;
+  if (!n) return null;
+  if (await findRequest(n, except)) return "request";
   const [row] = await sql`SELECT id FROM icons WHERE name = ${n} AND id IS DISTINCT FROM ${except ?? null}`;
-  return !!row;
+  return row ? "icon" : null;
 }
 
 /** Count one view of an icon's popup. Open to everyone; no revalidation, it's only a stat. */
@@ -97,11 +111,17 @@ export async function createIcon(
 ): Promise<number> {
   assertCanEdit();
   const n = clean(name, pixels, fill, status);
-  await assertFreeName(n);
-  const rows = await sql`
-    INSERT INTO icons (name, alts, pixels, pixels_fill, status)
-    VALUES (${n}, ${cleanAlts(alts)}, ${pixels}, ${fill}, ${status}) RETURNING id
-  `;
+  const request = await findRequest(n);
+  if (!request) await assertFreeName(n);
+  const rows = request
+    ? await sql`
+        UPDATE icons SET alts = ${cleanAlts([...request.alts, ...alts])}, pixels = ${pixels}, pixels_fill = ${fill}, status = ${status}, updated_at = now()
+        WHERE id = ${request.id} RETURNING id
+      `
+    : await sql`
+        INSERT INTO icons (name, alts, pixels, pixels_fill, status)
+        VALUES (${n}, ${cleanAlts(alts)}, ${pixels}, ${fill}, ${status}) RETURNING id
+      `;
   if (status === "validated") scheduleKitRebuild();
   revalidate();
   return rows[0].id as number;
@@ -117,12 +137,17 @@ export async function updateIcon(
 ): Promise<void> {
   assertCanEdit();
   const n = clean(name, pixels, fill, status);
-  await assertFreeName(n, id);
+  // Renaming onto an empty request replaces it.
+  const request = await findRequest(n, id);
+  if (!request) await assertFreeName(n, id);
   const before = await kitFields(id);
-  await sql`
-    UPDATE icons SET name = ${n}, alts = ${cleanAlts(alts)}, pixels = ${pixels}, pixels_fill = ${fill}, status = ${status}, updated_at = now()
-    WHERE id = ${id}
-  `;
+  await sql.transaction([
+    sql`DELETE FROM icons WHERE id = ${request?.id ?? null}`,
+    sql`
+      UPDATE icons SET name = ${n}, alts = ${cleanAlts([...(request?.alts ?? []), ...alts])}, pixels = ${pixels}, pixels_fill = ${fill}, status = ${status}, updated_at = now()
+      WHERE id = ${id}
+    `,
+  ]);
   if (changesKit(before, { name: n, pixels, pixels_fill: fill, status })) scheduleKitRebuild();
   revalidate(id);
 }
