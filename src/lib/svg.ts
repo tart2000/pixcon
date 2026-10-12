@@ -395,11 +395,29 @@ export const slugify = (name: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "") || "icon";
 
-export function downloadFile(filename: string, content: string, type = "image/svg+xml") {
-  const url = URL.createObjectURL(new Blob([content], { type }));
+export function downloadFile(filename: string, content: string | Blob, type = "image/svg+xml") {
+  const url = URL.createObjectURL(content instanceof Blob ? content : new Blob([content], { type }));
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/** Rasterise an SVG string into a square PNG (browser only). */
+export async function svgToPng(svg: string, size: number): Promise<Blob> {
+  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+  try {
+    const img = new Image(size, size);
+    img.src = url;
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    canvas.getContext("2d")!.drawImage(img, 0, 0, size, size);
+    return await new Promise((resolve, reject) =>
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("PNG export failed"))), "image/png"),
+    );
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }

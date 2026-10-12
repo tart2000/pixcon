@@ -4,7 +4,7 @@ import { StyleSelect } from "./StyleSelect";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { GRID_LINES, VIEWBOX, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { GRID_LINES, VIEWBOX, downloadFile, iconSvg, slugify, svgToPng, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { canEdit } from "@/lib/editing";
 import { kitTag } from "@/lib/kit";
@@ -13,6 +13,9 @@ import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
 import { CheckIcon, ChevronIcon, CloseIcon, CopyIcon, DownloadIcon, LinkIcon } from "./UiIcons";
+
+/** Side of the PNG export, in pixels. */
+const PNG_SIZE = 600;
 
 type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
 
@@ -41,7 +44,7 @@ export function IconModal({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [copied, setCopied] = useState<"name" | "link" | "code" | null>(null);
-  const [format, setFormat] = useState<"html" | "svg">("html");
+  const [format, setFormat] = useState<"html" | "svg" | "png">("html");
   const color = useIconColor();
   const icon = icons[index];
   const pixels = variant === "fill" ? (icon.fill ?? icon.pixels) : icon.pixels;
@@ -60,6 +63,39 @@ export function IconModal({
     counted.current = icon.id;
     recordView(icon.id).catch(() => {});
   }, [icon.id]);
+
+  const download = (ext: "svg" | "png", content: string | Blob) => {
+    downloadFile(`${slugify(icon.name)}-${variant}-${style}.${ext}`, content);
+    recordDownload(icon.id).catch(() => {});
+  };
+
+  // The PNG has no surrounding text to inherit a colour from: black unless one is picked.
+  const pngSvg = iconSvg(decode(pixels), style, { size: PNG_SIZE, color: color ?? "#000" });
+  const [png, setPng] = useState<{ svg: string; blob: Blob; url: string } | null>(null);
+  useEffect(() => {
+    if (format !== "png") return;
+    let live = true;
+    let url: string | null = null;
+    svgToPng(pngSvg, PNG_SIZE).then((blob) => {
+      if (!live) return;
+      url = URL.createObjectURL(blob);
+      setPng({ svg: pngSvg, blob, url });
+    });
+    return () => {
+      live = false;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [format, pngSvg]);
+  const pngReady = png?.svg === pngSvg ? png : null;
+
+  const copyPng = async () => {
+    // Pass the blob as a promise: Safari only allows clipboard writes started right in the click.
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": pngReady ? Promise.resolve(pngReady.blob) : svgToPng(pngSvg, PNG_SIZE) }),
+    ]);
+    setCopied("code");
+    setTimeout(() => setCopied((c) => (c === "code" ? null : c)), 1200);
+  };
 
   const step = (delta: number) => onIndex((index + delta + icons.length) % icons.length);
 
@@ -145,10 +181,10 @@ export function IconModal({
               <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
               <ColorPicker />
             </div>
-            {/* Code: two folder tabs on a panel holding the snippet and its actions. */}
+            {/* Code: folder tabs on a panel holding the snippet (or PNG) and its actions. */}
             <div>
               <div role="tablist" aria-label="Code format" className="flex">
-                {(["html", "svg"] as const).map((f) => (
+                {(["html", "svg", "png"] as const).map((f) => (
                   <button
                     key={f}
                     role="tab"
@@ -168,37 +204,47 @@ export function IconModal({
                 role="tabpanel"
                 className="flex flex-col gap-4 rounded-lg rounded-tl-none border border-border bg-background p-4"
               >
-                {/* Code style, like the other snippets on the site: inverted on the main colour. */}
-                <pre
-                  className={`overflow-auto rounded-lg bg-foreground p-4 font-mono leading-relaxed break-all whitespace-pre-wrap ${
-                    format === "html" ? "text-sm text-on-foreground" : "max-h-40 text-xs text-on-foreground/80"
-                  }`}
-                >
-                  {format === "html" ? (
-                    <>
-                      <span className="text-on-foreground/60">&lt;i class=&quot;</span>
-                      <span className="font-semibold">{kitTag(icon.name, style, variant).match(/class="([^"]*)"/)![1]}</span>
-                      <span className="text-on-foreground/60">&quot;&gt;&lt;/i&gt;</span>
-                    </>
-                  ) : (
-                    svg
-                  )}
-                </pre>
+                {format === "png" ? (
+                  <div className="flex h-40 items-center justify-center rounded-lg bg-subtle">
+                    {pngReady && (
+                      // eslint-disable-next-line @next/next/no-img-element -- a local blob URL, nothing to optimise.
+                      <img src={pngReady.url} alt={`${icon.name} PNG`} width={128} height={128} />
+                    )}
+                  </div>
+                ) : (
+                  // Code style, like the other snippets on the site: inverted on the main colour.
+                  <pre
+                    className={`overflow-auto rounded-lg bg-foreground p-4 font-mono leading-relaxed break-all whitespace-pre-wrap ${
+                      format === "html" ? "text-sm text-on-foreground" : "max-h-40 text-xs text-on-foreground/80"
+                    }`}
+                  >
+                    {format === "html" ? (
+                      <>
+                        <span className="text-on-foreground/60">&lt;i class=&quot;</span>
+                        <span className="font-semibold">{kitTag(icon.name, style, variant).match(/class="([^"]*)"/)![1]}</span>
+                        <span className="text-on-foreground/60">&quot;&gt;&lt;/i&gt;</span>
+                      </>
+                    ) : (
+                      svg
+                    )}
+                  </pre>
+                )}
                 <div className="flex gap-2">
-                  <button className="btn-primary flex-1" onClick={() => copy("code", code)}>
+                  <button
+                    className="btn-primary flex-1"
+                    onClick={() => (format === "png" ? copyPng() : copy("code", code))}
+                  >
                     {copied === "code" ? <CheckIcon /> : <CopyIcon />}
-                    {copied === "code" ? "Copied" : format === "html" ? "Copy HTML" : "Copy SVG"}
+                    {copied === "code" ? "Copied" : `Copy ${format.toUpperCase()}`}
                   </button>
-                  {format === "svg" && (
+                  {format !== "html" && (
                     <button
                       className="btn flex-1"
-                      onClick={() => {
-                        downloadFile(`${slugify(icon.name)}-${variant}-${style}.svg`, svg);
-                        recordDownload(icon.id).catch(() => {});
-                      }}
+                      disabled={format === "png" && !pngReady}
+                      onClick={() => (format === "png" ? pngReady && download("png", pngReady.blob) : download("svg", svg))}
                     >
                       <DownloadIcon />
-                      Download SVG
+                      Download {format.toUpperCase()}
                     </button>
                   )}
                 </div>
