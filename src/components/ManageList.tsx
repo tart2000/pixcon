@@ -9,13 +9,45 @@ import { matchesQuery } from "@/lib/alts";
 import { toSlug, typingSlug } from "@/lib/slug";
 import { canEdit } from "@/lib/editing";
 import { reservedReason } from "@/lib/reserved";
+import { Segmented } from "./Segmented";
 
-type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; status: Status; updatedAt: string };
+type Item = {
+  id: number;
+  name: string;
+  alts: string[];
+  pixels: string;
+  fill: string | null;
+  status: Status;
+  views: number;
+  downloads: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** Sort orders for the local editor; the last column shows the value being sorted on. */
+const SORTS = [
+  { id: "updated", label: "Updated" },
+  { id: "created", label: "Created" },
+  { id: "views", label: "Views" },
+  { id: "downloads", label: "Downloads" },
+  { id: "name", label: "Name" },
+] as const;
+
+type Sort = (typeof SORTS)[number]["id"];
+
+const compare: Record<Sort, (a: Item, b: Item) => number> = {
+  updated: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
+  created: (a, b) => b.createdAt.localeCompare(a.createdAt),
+  views: (a, b) => b.views - a.views,
+  downloads: (a, b) => b.downloads - a.downloads,
+  name: (a, b) => a.name.localeCompare(b.name),
+};
 
 const isBlank = (pixels: string | null) => !pixels || !pixels.includes("1");
 
 export function ManageList({ icons }: { icons: Item[] }) {
   const [filter, setFilter] = useState<Status | "all">("all");
+  const [sort, setSort] = useState<Sort>("updated");
   // One field to both search and request: typing filters the list, so duplicates show up before asking.
   const [request, setRequest] = useState("");
   const [requested, setRequested] = useState<string | null>(null);
@@ -29,8 +61,12 @@ export function ManageList({ icons }: { icons: Item[] }) {
   }, [icons]);
 
   const rows = useMemo(() => {
-    return icons.filter((i) => (filter === "all" || i.status === filter) && matchesQuery(i, request));
-  }, [icons, filter, request]);
+    return icons
+      .filter((i) => (filter === "all" || i.status === filter) && matchesQuery(i, request))
+      .sort(compare[sort]);
+  }, [icons, filter, request, sort]);
+  // Name sorting has nothing to show in the last column: keep the update date there.
+  const column = sort === "name" ? "updated" : sort;
 
   const slug = toSlug(request);
   const existing = slug ? icons.find((i) => i.name === slug) : undefined;
@@ -109,6 +145,7 @@ export function ManageList({ icons }: { icons: Item[] }) {
             </button>
           ))}
         </div>
+        {canEdit && <Segmented label="Sort by" options={SORTS} value={sort} onChange={setSort} />}
       </div>
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
@@ -120,7 +157,7 @@ export function ManageList({ icons }: { icons: Item[] }) {
           <span>Regular · Fill</span>
           <span>Name</span>
           <span>Status</span>
-          <span>Updated</span>
+          <span>{SORTS.find((s) => s.id === column)!.label}</span>
           {canEdit && <span />}
         </div>
         {rows.length === 0 ? (
@@ -156,14 +193,18 @@ export function ManageList({ icons }: { icons: Item[] }) {
                 ) : (
                   <StatusBadge status={i.status} />
                 )}
-                {/* Relative/local time differs between server and browser render. */}
-                <span
-                  className="hidden text-sm text-muted sm:block"
-                  title={new Date(i.updatedAt).toLocaleString()}
-                  suppressHydrationWarning
-                >
-                  {timeAgo(i.updatedAt)}
-                </span>
+                {column === "views" || column === "downloads" ? (
+                  <span className="hidden font-mono text-sm text-muted sm:block">{i[column]}</span>
+                ) : (
+                  // Relative/local time differs between server and browser render.
+                  <span
+                    className="hidden text-sm text-muted sm:block"
+                    title={new Date(column === "created" ? i.createdAt : i.updatedAt).toLocaleString()}
+                    suppressHydrationWarning
+                  >
+                    {timeAgo(column === "created" ? i.createdAt : i.updatedAt)}
+                  </span>
+                )}
                 {canEdit && (
                   <Link href={`/icons/${i.id}`} className="btn hidden h-8 sm:inline-flex">
                     {i.status === "requested" ? "Draw" : "Edit"}

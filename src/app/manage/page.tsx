@@ -44,6 +44,9 @@ export default async function ManagePage() {
           pixels: i.pixels,
           fill: i.pixels_fill,
           status: i.status,
+          views: i.views,
+          downloads: i.downloads,
+          createdAt: new Date(i.created_at).toISOString(),
           updatedAt: new Date(i.updated_at).toISOString(),
         }))}
       />

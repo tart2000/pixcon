@@ -18,13 +18,14 @@ export type Icon = {
   views: number;
   /** Times the icon was downloaded as SVG from the gallery or its popup. */
   downloads: number;
+  created_at: string;
   updated_at: string;
 };
 
 /** All icons, or only those with the given status; most recently updated first. */
 export async function listIcons(status?: Status): Promise<Icon[]> {
   return (await sql`
-    SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, updated_at FROM icons
+    SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons
     WHERE ${status ?? null}::text IS NULL OR status = ${status ?? null}
     ORDER BY updated_at DESC
   `) as Icon[];
@@ -32,7 +33,7 @@ export async function listIcons(status?: Status): Promise<Icon[]> {
 
 export async function getIcon(id: number): Promise<Icon | null> {
   const rows = (await sql`
-    SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, updated_at FROM icons WHERE id = ${id}
+    SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons WHERE id = ${id}
   `) as Icon[];
   return rows[0] ?? null;
 }
