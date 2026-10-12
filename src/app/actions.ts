@@ -8,6 +8,7 @@ import { cleanAlts } from "@/lib/alts";
 import { toSlug } from "@/lib/slug";
 import { assertCanEdit } from "@/lib/editing";
 import { reservedReason } from "@/lib/reserved";
+import { rebuildKitNow, scheduleKitRebuild } from "@/lib/kitRebuild";
 
 const EMPTY = "0".repeat(CELLS);
 
@@ -44,6 +45,19 @@ function revalidate(id?: number) {
   revalidatePath("/icons");
   revalidatePath("/manage");
   if (id) revalidatePath(`/icons/${id}`);
+}
+
+type KitFields = { name: string; pixels: string; pixels_fill: string | null; status: string };
+
+/** The kit holds the name and both grids of every validated icon: rebuild it when one of those changes. */
+function changesKit(before: KitFields | undefined, after: KitFields | undefined) {
+  const inKit = (i?: KitFields) => (i?.status === "validated" ? [i.name, i.pixels, i.pixels_fill].join() : null);
+  return inKit(before) !== inKit(after);
+}
+
+async function kitFields(id: number): Promise<KitFields | undefined> {
+  const [row] = await sql`SELECT name, pixels, pixels_fill, status FROM icons WHERE id = ${id}`;
+  return row as KitFields | undefined;
 }
 
 /** Live check for the editor: is this slug used by another icon? */
@@ -88,6 +102,7 @@ export async function createIcon(
     INSERT INTO icons (name, alts, pixels, pixels_fill, status)
     VALUES (${n}, ${cleanAlts(alts)}, ${pixels}, ${fill}, ${status}) RETURNING id
   `;
+  if (status === "validated") scheduleKitRebuild();
   revalidate();
   return rows[0].id as number;
 }
@@ -103,10 +118,12 @@ export async function updateIcon(
   assertCanEdit();
   const n = clean(name, pixels, fill, status);
   await assertFreeName(n, id);
+  const before = await kitFields(id);
   await sql`
     UPDATE icons SET name = ${n}, alts = ${cleanAlts(alts)}, pixels = ${pixels}, pixels_fill = ${fill}, status = ${status}, updated_at = now()
     WHERE id = ${id}
   `;
+  if (changesKit(before, { name: n, pixels, pixels_fill: fill, status })) scheduleKitRebuild();
   revalidate(id);
 }
 
@@ -133,17 +150,25 @@ export async function duplicateIcon(
 export async function setIconStatus(id: number, status: Status): Promise<void> {
   assertCanEdit();
   if (!isStatus(status)) throw new Error("Invalid status");
-  if (status === "validated") {
-    const [row] = await sql`SELECT pixels, pixels_fill FROM icons WHERE id = ${id}`;
-    if (!row) throw new Error("Icon not found");
-    assertValidatable(row.pixels, row.pixels_fill);
-  }
+  const before = await kitFields(id);
+  if (!before) throw new Error("Icon not found");
+  if (status === "validated") assertValidatable(before.pixels, before.pixels_fill);
   await sql`UPDATE icons SET status = ${status}, updated_at = now() WHERE id = ${id}`;
+  if (changesKit(before, { ...before, status })) scheduleKitRebuild();
   revalidate(id);
 }
 
 export async function deleteIcon(id: number): Promise<void> {
   assertCanEdit();
+  const before = await kitFields(id);
   await sql`DELETE FROM icons WHERE id = ${id}`;
+  if (changesKit(before, undefined)) scheduleKitRebuild();
   revalidate();
+}
+
+/** Send the pending kit rebuild right away instead of waiting for the delay. */
+export async function publishKitNow(): Promise<void> {
+  assertCanEdit();
+  await rebuildKitNow();
+  revalidatePath("/manage");
 }
