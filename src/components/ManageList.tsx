@@ -129,7 +129,24 @@ export function ManageList({ icons }: { icons: Item[] }) {
         ) : null}
       </form>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Small screens: both controls collapse into native selects. */}
+      <div className="flex flex-wrap gap-2 sm:hidden">
+        <Select
+          label="Status"
+          value={filter}
+          onChange={setFilter}
+          dot={STATUSES.find((s) => s.id === filter)?.dot}
+          options={[{ id: "all" as const, label: "All" }, ...STATUSES].map((s) => ({
+            id: s.id,
+            label: `${s.label} (${counts[s.id]})`,
+          }))}
+        />
+        {canEdit && (
+          <Select label="Sort by" value={sort} onChange={setSort} options={SORTS.map((s) => ({ ...s, label: `Sort: ${s.label}` }))} />
+        )}
+      </div>
+
+      <div className="hidden items-center justify-between gap-3 sm:flex">
         <div className="flex flex-wrap gap-1">
           {[{ id: "all" as const, label: "All" }, ...STATUSES].map((s) => (
             <button
@@ -253,19 +270,47 @@ function StatusSelect({
   disabled: boolean;
   onChange: (s: Status) => void;
 }) {
-  const dot = STATUSES.find((s) => s.id === value)!.dot;
+  return (
+    <Select
+      label="Status"
+      value={value}
+      disabled={disabled}
+      onChange={onChange}
+      dot={STATUSES.find((s) => s.id === value)!.dot}
+      options={STATUSES.map((s) => ({ ...s, disabled: s.id === "validated" && !canValidate }))}
+    />
+  );
+}
+
+/** Native select with a chevron and an optional status dot in front of the value. */
+function Select<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  disabled,
+  dot,
+}: {
+  label: string;
+  value: T;
+  options: readonly { id: T; label: string; disabled?: boolean }[];
+  onChange: (v: T) => void;
+  disabled?: boolean;
+  dot?: string;
+}) {
   return (
     <div className="relative w-fit">
-      <span className={`pointer-events-none absolute top-1/2 left-2.5 size-2 -translate-y-1/2 rounded-full ${dot}`} />
+      {dot && <span className={`pointer-events-none absolute top-1/2 left-2.5 size-2 -translate-y-1/2 rounded-full ${dot}`} />}
       <select
+        aria-label={label}
         value={value}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value as Status)}
-        className="h-8 appearance-none rounded-md border border-border bg-background pr-7 pl-6 text-sm outline-none hover:border-border-strong focus:ring-2 focus:ring-foreground/10 disabled:opacity-50"
+        onChange={(e) => onChange(e.target.value as T)}
+        className={`h-8 appearance-none rounded-md border border-border bg-background pr-7 text-sm outline-none hover:border-border-strong focus:ring-2 focus:ring-foreground/10 disabled:opacity-50 ${dot ? "pl-6" : "pl-2.5"}`}
       >
-        {STATUSES.map((s) => (
-          <option key={s.id} value={s.id} disabled={s.id === "validated" && !canValidate}>
-            {s.label}
+        {options.map((o) => (
+          <option key={o.id} value={o.id} disabled={o.disabled}>
+            {o.label}
           </option>
         ))}
       </select>
