@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:init": "node --env-file=.env.local scripts/init-db.mjs",
     "db:seed": "node --env-file=.env.local scripts/seed.mjs",
-    "build:kit": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env.local scripts/build-kit.mjs"
+    "build:kit": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env.local scripts/build-kit.mjs",
+    "publish:kit": "node scripts/publish-kit.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

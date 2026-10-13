@@ -1,0 +1,26 @@
+{
+  "name": "pixiconsio",
+  "version": "1.0.0",
+  "description": "Pixicons kit: 11×11 pixel icons in 9 styles, written as <i class=\"px px-heart\"></i> and drawn as inline SVG.",
+  "keywords": [
+    "icons",
+    "pixel-icons",
+    "pixel-art",
+    "svg",
+    "icon-library",
+    "11x11"
+  ],
+  "homepage": "https://www.pixicons.io",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tart2000/pixcon.git",
+    "directory": "packages/pixiconsio"
+  },
+  "files": [
+    "pixicons.js"
+  ],
+  "main": "pixicons.js",
+  "jsdelivr": "pixicons.js",
+  "unpkg": "pixicons.js"
+}

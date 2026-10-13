@@ -1,0 +1,29 @@
+# Mirrors the kit to npm (and so jsDelivr) as `pixiconsio`, so sites can still load it if www.pixicons.io can't
+# serve it. Runs every hour and publishes only when the validated icons changed.
+name: Publish kit to npm
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # npm trusted publishing (no token) and provenance
+
+concurrency: publish-kit
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm run build:kit
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - run: node scripts/publish-kit.mjs
