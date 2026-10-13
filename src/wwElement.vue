@@ -14,15 +14,17 @@
 <script>
 import { computed, onMounted } from "vue";
 
-const KIT_URL = "https://www.pixicons.io/kit/pixicons.js";
+// The kit from pixicons.io, then its npm mirror on jsDelivr if pixicons.io can't serve it.
+const KIT_URLS = ["https://www.pixicons.io/kit/pixicons.js", "https://cdn.jsdelivr.net/npm/pixiconsio@1/pixicons.js"];
 
 /** Load the kit once into the page the icons live in (the editor canvas is its own document). */
-function loadKit() {
-  const doc = wwLib.getFrontDocument();
-  if (!doc || doc.querySelector(`script[src="${KIT_URL}"]`)) return;
+function loadKit(doc = wwLib.getFrontDocument(), i = 0) {
+  if (!doc || i >= KIT_URLS.length) return;
+  if (i === 0 && KIT_URLS.some((url) => doc.querySelector(`script[src="${url}"]`))) return;
   const script = doc.createElement("script");
-  script.src = KIT_URL;
+  script.src = KIT_URLS[i];
   script.async = true;
+  script.onerror = () => loadKit(doc, i + 1);
   doc.head.appendChild(script);
 }
 
@@ -35,7 +37,7 @@ export default {
     /* wwEditor:end */
   },
   setup(props) {
-    onMounted(loadKit);
+    onMounted(() => loadKit());
 
     const name = computed(() =>
       String(props.content?.icon || "")
