@@ -48,9 +48,13 @@ copyFileSync(join(PKG, "LICENSE"), join(dir, "LICENSE"));
 copyFileSync("public/kit/pixicons.js", join(dir, "pixicons.js"));
 const otp = process.argv.find((a) => a.startsWith("--otp="));
 execFileSync("npm", ["publish", "--access", "public", ...(otp ? [otp] : [])], { cwd: dir, stdio: "inherit" });
-console.log(`published ${pkg.name}@${version}`);
+// A trusted publisher without "Allow npm publish" stages the version instead: it waits for approval on npmjs.com.
+const live = await fetch(`https://registry.npmjs.org/${pkg.name}/${version}`);
+console.log(live.ok ? `published ${pkg.name}@${version}` : `${pkg.name}@${version} sent, but not live yet (staged for approval?)`);
 
-// jsDelivr caches what `@1` points to for a while: ask it to pick up the new version now (best effort).
+// jsDelivr caches what `@latest` and `@1` point to for a while: ask it to pick up the new version now (best effort).
 await new Promise((r) => setTimeout(r, 30_000));
-const purge = await fetch(`https://purge.jsdelivr.net/npm/${pkg.name}@${version.split(".")[0]}/pixicons.js`).catch(() => null);
-console.log(`jsDelivr purge: ${purge?.status ?? "failed"}`);
+for (const tag of ["latest", version.split(".")[0]]) {
+  const purge = await fetch(`https://purge.jsdelivr.net/npm/${pkg.name}@${tag}/pixicons.js`).catch(() => null);
+  console.log(`jsDelivr purge @${tag}: ${purge?.status ?? "failed"}`);
+}

@@ -7,10 +7,23 @@ published whenever icons are added or redrawn.
 
 ## Use
 
+From the CDN, with no install (`@latest` always serves the newest icons):
+
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pixiconsio@1/pixicons.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pixiconsio@latest/pixicons.js"></script>
 
 <i class="px px-heart px-blob px-fill"></i>
+```
+
+Or with npm and a bundler:
+
+```bash
+npm install pixiconsio
+```
+
+```js
+// in your app's entry file
+import "pixiconsio";
 ```
 
 Each icon is `px px-{name} px-{style} px-{variant}`:

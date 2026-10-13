@@ -32,19 +32,32 @@ export default function GettingStartedPage() {
       </header>
 
       <Step n={1} title="Add the script">
+        <p className="text-muted">Pick one of the two ways to load the kit. Either way, it&apos;s the same script.</p>
+
+        <h3 className="mt-2 font-semibold">From the CDN (jsDelivr)</h3>
         <p className="text-muted">
-          Paste this line in the <code className="font-mono text-foreground">&lt;head&gt;</code> of your page.
+          The simplest: paste this line in the <code className="font-mono text-foreground">&lt;head&gt;</code> of your
+          page. Nothing to install, and <code className="font-mono text-foreground">@latest</code> always serves the
+          newest icons, so you never have to change it.
         </p>
         <CodeBlock code={KIT_SCRIPT} />
+
+        <h3 className="mt-2 font-semibold">With npm</h3>
         <p className="text-muted">
-          It&apos;s served by jsDelivr from the{" "}
+          For projects with a bundler (Vite, webpack, Next.js…). Install the{" "}
           <a href="https://www.npmjs.com/package/pixiconsio" className="text-foreground underline underline-offset-4">
             pixiconsio
           </a>{" "}
-          npm package, and <code className="font-mono text-foreground">@1</code> picks up new icons as they&apos;re
-          published. Using a bundler? Install the package and import it once:
+          package:
         </p>
-        <CodeBlock code={`npm install pixiconsio\n\n// in your entry file\nimport "pixiconsio";`} />
+        <CodeBlock code="npm install pixiconsio" />
+        <p className="text-muted">Then import it once, in your app&apos;s entry file:</p>
+        <CodeBlock code={`import "pixiconsio";`} />
+        <p className="text-muted">
+          The installed version doesn&apos;t change on its own: run{" "}
+          <code className="font-mono text-foreground">npm update pixiconsio</code> to get new icons. Page-wide defaults
+          (below) only work with the script tag.
+        </p>
       </Step>
 
       <Step n={2} title="Write an icon">
