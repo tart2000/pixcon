@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Script from "next/script";
 import { CodeBlock } from "@/components/CodeBlock";
-import { KIT_CDN_URL, KIT_SCRIPT, KIT_URL } from "@/lib/kit";
+import { KIT_SCRIPT, KIT_URL } from "@/lib/kit";
 import { kitSizeKB } from "@/lib/kitSize";
 import { pageMeta } from "@/lib/meta";
 import { VARIANTS } from "@/lib/pixels";
@@ -37,13 +37,14 @@ export default function GettingStartedPage() {
         </p>
         <CodeBlock code={KIT_SCRIPT} />
         <p className="text-muted">
-          The kit is also on npm as{" "}
+          It&apos;s served by jsDelivr from the{" "}
           <a href="https://www.npmjs.com/package/pixiconsio" className="text-foreground underline underline-offset-4">
             pixiconsio
-          </a>
-          , so you can load it from jsDelivr instead:
+          </a>{" "}
+          npm package, and <code className="font-mono text-foreground">@1</code> picks up new icons as they&apos;re
+          published. Using a bundler? Install the package and import it once:
         </p>
-        <CodeBlock code={`<script src="${KIT_CDN_URL}"></script>`} />
+        <CodeBlock code={`npm install pixiconsio\n\n// in your entry file\nimport "pixiconsio";`} />
       </Step>
 
       <Step n={2} title="Write an icon">

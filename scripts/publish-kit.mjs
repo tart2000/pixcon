@@ -49,3 +49,8 @@ copyFileSync("public/kit/pixicons.js", join(dir, "pixicons.js"));
 const otp = process.argv.find((a) => a.startsWith("--otp="));
 execFileSync("npm", ["publish", "--access", "public", ...(otp ? [otp] : [])], { cwd: dir, stdio: "inherit" });
 console.log(`published ${pkg.name}@${version}`);
+
+// jsDelivr caches what `@1` points to for a while: ask it to pick up the new version now (best effort).
+await new Promise((r) => setTimeout(r, 30_000));
+const purge = await fetch(`https://purge.jsdelivr.net/npm/${pkg.name}@${version.split(".")[0]}/pixicons.js`).catch(() => null);
+console.log(`jsDelivr purge: ${purge?.status ?? "failed"}`);
