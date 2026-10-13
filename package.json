@@ -1,6 +1,6 @@
 {
   "name": "pixicons-icon",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "build": "weweb build",
     "serve": "weweb serve"

@@ -14,8 +14,8 @@
 <script>
 import { computed, onMounted } from "vue";
 
-// The kit from pixicons.io, then its npm mirror on jsDelivr if pixicons.io can't serve it.
-const KIT_URLS = ["https://www.pixicons.io/kit/pixicons.js", "https://cdn.jsdelivr.net/npm/pixiconsio@1/pixicons.js"];
+// The kit from jsDelivr (npm package `pixiconsio`), then from pixicons.io if jsDelivr can't serve it.
+const KIT_URLS = ["https://cdn.jsdelivr.net/npm/pixiconsio@1/pixicons.js", "https://www.pixicons.io/kit/pixicons.js"];
 
 /** Load the kit once into the page the icons live in (the editor canvas is its own document). */
 function loadKit(doc = wwLib.getFrontDocument(), i = 0) {

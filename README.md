@@ -2,8 +2,8 @@
 
 A WeWeb coded element that shows any [Pixicons](https://www.pixicons.io) icon.
 
-It loads the Pixicons kit (`https://www.pixicons.io/kit/pixicons.js`, or its npm mirror on jsDelivr if that
-fails) into the page and renders
+It loads the Pixicons kit from jsDelivr (npm package `pixiconsio`, or `https://www.pixicons.io/kit/pixicons.js`
+if that fails) into the page and renders
 `<i class="px px-{icon} px-{style} px-{variant}">`, so new icons are available as soon as they
 are published on pixicons.io, with no update of this component.
 
