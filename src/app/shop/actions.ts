@@ -1,7 +1,6 @@
 "use server";
 
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { getValidatedIconByName } from "@/lib/db";
 import { STYLES } from "@/lib/svg";
 import { SHIPPING_COUNTRIES, SHIPPING_PRICE, findColor, findInk, findProduct, isStyle, isVariant, priceOf } from "@/lib/merch/products";
@@ -15,7 +14,7 @@ const TAX_CODE_SHIPPING = "txcd_92010001";
 export type Design = { product: string; icon: string; style: string; variant: string; ink: string; color: string; size: string };
 
 /**
- * Open a Stripe Checkout for one design. Everything is checked and priced again here: the browser
+ * Create a Stripe Checkout for one design and return its URL. Everything is checked and priced again here: the browser
  * only says what was picked. The design rides along in the session's metadata for the webhook.
  */
 export async function startCheckout(design: Design) {
@@ -83,5 +82,7 @@ export async function startCheckout(design: Design) {
     success_url: `${origin}/shop/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}${back}`,
   });
-  redirect(session.url!);
+  // Returned rather than redirected to: a server-action redirect to another site reaches the
+  // client as a thrown error, which would flash the error message before Stripe loads.
+  return session.url!;
 }

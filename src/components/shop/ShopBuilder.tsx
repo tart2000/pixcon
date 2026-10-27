@@ -58,12 +58,12 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
   const [paying, startPaying] = useTransition();
   const [payError, setPayError] = useState<string | null>(null);
 
-  // Stripe takes it from here: the action redirects to its checkout page.
+  // Stripe takes it from here: the action returns its checkout page, which we open.
   const checkout = () =>
     startPaying(async () => {
       setPayError(null);
       try {
-        await startCheckout({
+        const url = await startCheckout({
           product: product.slug,
           icon: icon!.name,
           style,
@@ -72,6 +72,7 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
           color: color.name,
           size: sized.size,
         });
+        window.location.assign(url);
       } catch {
         setPayError("Checkout couldn't start. Please try again.");
       }
