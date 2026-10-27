@@ -8,6 +8,10 @@ import { SHIPPING_COUNTRIES, SHIPPING_PRICE, findColor, findInk, findProduct, is
 import { stripe } from "@/lib/merch/stripe";
 import { SITE_URL } from "@/lib/merch/printful";
 
+/** Stripe product tax codes: "General - Tangible Goods" and "Shipping". */
+const TAX_CODE_GOODS = "txcd_99999999";
+const TAX_CODE_SHIPPING = "txcd_92010001";
+
 export type Design = { product: string; icon: string; style: string; variant: string; ink: string; color: string; size: string };
 
 /**
@@ -38,13 +42,18 @@ export async function startCheckout(design: Design) {
         price_data: {
           currency: "eur",
           unit_amount: Math.round(priceOf(product, sized.cost) * 100),
+          tax_behavior: "inclusive",
           product_data: {
             name: `${product.label} · ${icon.name}`,
             description: `${style} ${design.variant} icon in ${ink.name.toLowerCase()} · ${color.name} · ${sized.size}`,
+            tax_code: TAX_CODE_GOODS,
           },
         },
       },
     ],
+    // Stripe Tax works out the VAT already included in our prices, from the shipping address and the
+    // account's registrations (France, small seller: French VAT on EU sales under €10,000 a year).
+    automatic_tax: { enabled: true },
     shipping_address_collection: { allowed_countries: [...SHIPPING_COUNTRIES] },
     shipping_options: [
       {
@@ -52,6 +61,8 @@ export async function startCheckout(design: Design) {
           type: "fixed_amount",
           display_name: "Standard shipping",
           fixed_amount: { amount: Math.round(SHIPPING_PRICE * 100), currency: "eur" },
+          tax_behavior: "inclusive",
+          tax_code: TAX_CODE_SHIPPING,
           // Printful prints in 2–5 business days, then 3–6 days of delivery in the EU.
           delivery_estimate: { minimum: { unit: "business_day", value: 5 }, maximum: { unit: "business_day", value: 10 } },
         },
