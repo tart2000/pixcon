@@ -51,6 +51,15 @@ export const findInk = (hex: string | null | undefined) => INKS.find((i) => i.he
 export const findColor = (product: Product, name: string | null | undefined) =>
   product.catalog.colors.find((c) => c.name.toLowerCase() === name?.toLowerCase());
 
+/** Countries we ship to: the European Union. */
+export const SHIPPING_COUNTRIES = [
+  "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU",
+  "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK",
+] as const;
+
+/** Flat shipping per order, in euros, VAT included. Printful bills €4.49 before VAT for one item in the EU. */
+export const SHIPPING_PRICE = 5.9;
+
 /** French VAT rate: catalog costs are before VAT, shop prices include it. */
 export const VAT = 0.2;
 

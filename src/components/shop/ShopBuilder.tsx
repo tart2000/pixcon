@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
 import { iconPath, type StyleId } from "@/lib/svg";
 import { matchesQuery } from "@/lib/alts";
@@ -8,6 +8,7 @@ import { canEdit } from "@/lib/editing";
 import {
   INKS,
   PRODUCTS,
+  SHIPPING_PRICE,
   VAT,
   findColor,
   findInk,
@@ -21,6 +22,7 @@ import {
   type Product,
   type ProductColor,
 } from "@/lib/merch/products";
+import { startCheckout } from "@/app/shop/actions";
 import { IconGlyph } from "../IconGlyph";
 import { Segmented } from "../Segmented";
 import { StyleSelect } from "../StyleSelect";
@@ -53,6 +55,27 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
   const pixels = icon && (shownVariant === "fill" ? icon.fill! : icon.pixels);
   const sized = color.sizes.find((s) => s.size === size) ?? defaultSize(color);
   const price = priceOf(product, sized.cost);
+  const [paying, startPaying] = useTransition();
+  const [payError, setPayError] = useState<string | null>(null);
+
+  // Stripe takes it from here: the action redirects to its checkout page.
+  const checkout = () =>
+    startPaying(async () => {
+      setPayError(null);
+      try {
+        await startCheckout({
+          product: product.slug,
+          icon: icon!.name,
+          style,
+          variant: shownVariant,
+          ink,
+          color: color.name,
+          size: sized.size,
+        });
+      } catch {
+        setPayError("Checkout couldn't start. Please try again.");
+      }
+    });
 
   const pickColor = (c: ProductColor) => {
     setColor(c);
@@ -127,9 +150,13 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
               <span className="text-xs text-muted">VAT included</span>
             </span>
           </div>
-          <button className="btn-primary h-11" disabled>
-            Checkout coming soon
+          <button className="btn-primary h-11" onClick={checkout} disabled={paying}>
+            {paying ? "Opening checkout…" : "Checkout"}
           </button>
+          {payError && <p className="text-center text-sm text-red-600 dark:text-red-400">{payError}</p>}
+          <p className="text-center text-xs text-muted">
+            Shipping {euros.format(SHIPPING_PRICE)} to the EU · Printed on demand, delivered in 5–10 business days
+          </p>
           {canEdit && (
             // What Printful bills us (VAT included), and what's left once VAT and Printful are paid.
             <p className="text-center font-mono text-xs text-muted">
