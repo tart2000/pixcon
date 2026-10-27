@@ -32,6 +32,11 @@ export const LinkIcon = () => (
     <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
   </svg>
 );
+export const ShirtIcon = () => (
+  <svg {...stroke}>
+    <path d="M8 3 3 6l2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0Z" />
+  </svg>
+);
 export const CloseIcon = () => (
   <svg {...stroke} width={16} height={16}>
     <path d="M18 6 6 18M6 6l12 12" />

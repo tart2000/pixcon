@@ -10,10 +10,12 @@
     "db:init": "node --env-file=.env.local scripts/init-db.mjs",
     "db:seed": "node --env-file=.env.local scripts/seed.mjs",
     "build:kit": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env.local scripts/build-kit.mjs",
-    "publish:kit": "node scripts/publish-kit.mjs"
+    "publish:kit": "node scripts/publish-kit.mjs",
+    "merch:catalog": "node --env-file=.env.local scripts/merch-catalog.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "@resvg/resvg-js": "^2.6.2",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",

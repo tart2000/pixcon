@@ -57,6 +57,7 @@ const NAV = [
   { href: "/", label: "Home" },
   { href: "/icons", label: "Icons" },
   { href: "/how-to", label: "How to" },
+  { href: "/shop", label: "Shop" },
   ...(canEdit ? [{ href: "/manage", label: "Manage" }] : []),
 ];
 

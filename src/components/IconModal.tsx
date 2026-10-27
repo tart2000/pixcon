@@ -12,7 +12,8 @@ import { recordDownload, recordView } from "@/app/actions";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
-import { CheckIcon, ChevronIcon, CloseIcon, CopyIcon, DownloadIcon, LinkIcon } from "./UiIcons";
+import { findInk } from "@/lib/merch/products";
+import { CheckIcon, ChevronIcon, CloseIcon, CopyIcon, DownloadIcon, LinkIcon, ShirtIcon } from "./UiIcons";
 
 /** Side of the PNG export, in pixels. */
 const PNG_SIZE = 600;
@@ -258,6 +259,19 @@ export function IconModal({
                 )}
               </div>
             </div>
+            {/* The shop opens on this icon, as shown here (style, variant and, when it's an ink, the colour). */}
+            <Link
+              href={`/shop?${new URLSearchParams({
+                icon: icon.name,
+                style,
+                variant: variant === "fill" && icon.fill ? "fill" : "regular",
+                ...(findInk(color) && { ink: color!.slice(1) }),
+              })}`}
+              className="btn-fun h-11 w-full"
+            >
+              <ShirtIcon />
+              Shop · Put it on a T-shirt
+            </Link>
           </div>
         </div>
 

@@ -1,0 +1,679 @@
+[
+  {
+    "id": 456,
+    "name": "Unisex Organic Cotton Creator 2.0 T-Shirt | Stanley/Stella STTU169",
+    "placement": "front",
+    "technique": "dtg",
+    "printArea": {
+      "width": 12,
+      "height": 16,
+      "dpi": 150
+    },
+    "shipping": 4.49,
+    "template": {
+      "image": "/merch/456-front.png",
+      "width": 3000,
+      "height": 3000,
+      "area": {
+        "left": 930,
+        "top": 409,
+        "width": 1140,
+        "height": 1520
+      }
+    },
+    "colors": [
+      {
+        "name": "Anthracite",
+        "hex": "#3e383e",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 12424,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 12425,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 12426,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 12427,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 12428,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "Black",
+        "hex": "#111111",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53682,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 11869,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 11870,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 11871,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 11872,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 11873,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 17229,
+            "cost": 14.79
+          },
+          {
+            "size": "4XL",
+            "variantId": 17233,
+            "cost": 16.09
+          },
+          {
+            "size": "5XL",
+            "variantId": 17236,
+            "cost": 17.39
+          }
+        ]
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#801f24",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 14944,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 14945,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 14946,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 14947,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 14948,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "Cotton Pink",
+        "hex": "#ffe9eb",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53665,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 17412,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 17413,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 17414,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 17415,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 17416,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 53666,
+            "cost": 14.79
+          }
+        ]
+      },
+      {
+        "name": "Dark Heather Blue",
+        "hex": "#7a8ca8",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 14949,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 14950,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 14951,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 14953,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 14952,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "Dark Heather Grey",
+        "hex": "#2b2928",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 14954,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 14955,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 14956,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 14957,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 14958,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "Desert Dust",
+        "hex": "#dcccb4",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53679,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 12429,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 12430,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 12431,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 12432,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 12433,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 17230,
+            "cost": 14.79
+          }
+        ]
+      },
+      {
+        "name": "Fraiche Peche",
+        "hex": "#ffd2be",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 17134,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 17135,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 17136,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 17137,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 17138,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "French Navy",
+        "hex": "#112537",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53680,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 11879,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 11880,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 11881,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 11882,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 11883,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 17231,
+            "cost": 14.79
+          },
+          {
+            "size": "4XL",
+            "variantId": 17234,
+            "cost": 16.09
+          },
+          {
+            "size": "5XL",
+            "variantId": 17237,
+            "cost": 17.39
+          }
+        ]
+      },
+      {
+        "name": "Heather Grey",
+        "hex": "#cfcbc8",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 54613,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 11884,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 11885,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 11886,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 11887,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 11888,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 54614,
+            "cost": 14.79
+          },
+          {
+            "size": "4XL",
+            "variantId": 54615,
+            "cost": 16.09
+          },
+          {
+            "size": "5XL",
+            "variantId": 54616,
+            "cost": 17.39
+          }
+        ]
+      },
+      {
+        "name": "Khaki",
+        "hex": "#6E6B4D",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53675,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 17144,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 17145,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 17146,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 17147,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 17148,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 53676,
+            "cost": 14.79
+          },
+          {
+            "size": "4XL",
+            "variantId": 53677,
+            "cost": 16.09
+          },
+          {
+            "size": "5XL",
+            "variantId": 53678,
+            "cost": 17.39
+          }
+        ]
+      },
+      {
+        "name": "Lavender",
+        "hex": "#f7ecff",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 17422,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 17423,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 17424,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 17425,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 17426,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "Red",
+        "hex": "#ed0739",
+        "sizes": [
+          {
+            "size": "S",
+            "variantId": 11874,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 11875,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 11876,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 11877,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 11878,
+            "cost": 13.49
+          }
+        ]
+      },
+      {
+        "name": "Stargazer",
+        "hex": "#3d737d",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53671,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 12439,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 12440,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 12441,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 12442,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 12443,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 53672,
+            "cost": 14.79
+          },
+          {
+            "size": "4XL",
+            "variantId": 53673,
+            "cost": 16.09
+          },
+          {
+            "size": "5XL",
+            "variantId": 53674,
+            "cost": 17.39
+          }
+        ]
+      },
+      {
+        "name": "White",
+        "hex": "#ffffff",
+        "sizes": [
+          {
+            "size": "XS",
+            "variantId": 53681,
+            "cost": 12.19
+          },
+          {
+            "size": "S",
+            "variantId": 11864,
+            "cost": 12.19
+          },
+          {
+            "size": "M",
+            "variantId": 11865,
+            "cost": 12.19
+          },
+          {
+            "size": "L",
+            "variantId": 11866,
+            "cost": 12.19
+          },
+          {
+            "size": "XL",
+            "variantId": 11867,
+            "cost": 12.19
+          },
+          {
+            "size": "2XL",
+            "variantId": 11868,
+            "cost": 13.49
+          },
+          {
+            "size": "3XL",
+            "variantId": 17228,
+            "cost": 14.79
+          },
+          {
+            "size": "4XL",
+            "variantId": 17232,
+            "cost": 16.09
+          },
+          {
+            "size": "5XL",
+            "variantId": 17235,
+            "cost": 17.39
+          }
+        ]
+      }
+    ],
+    "sizeChart": {
+      "unit": "cm",
+      "rows": [
+        {
+          "label": "Length",
+          "values": {
+            "XS": "65",
+            "S": "69",
+            "M": "73",
+            "L": "75",
+            "XL": "77",
+            "2XL": "79",
+            "3XL": "81",
+            "4XL": "83",
+            "5XL": "84"
+          }
+        },
+        {
+          "label": "Width",
+          "values": {
+            "XS": "47.5",
+            "S": "49.5",
+            "M": "53.5",
+            "L": "56.5",
+            "XL": "59.5",
+            "2XL": "63.5",
+            "3XL": "67.5",
+            "4XL": "72.5",
+            "5XL": "77.5"
+          }
+        },
+        {
+          "label": "Sleeve length",
+          "values": {
+            "XS": "21",
+            "S": "22.5",
+            "M": "24",
+            "L": "24.5",
+            "XL": "25",
+            "2XL": "25.5",
+            "3XL": "26",
+            "4XL": "26",
+            "5XL": "26"
+          }
+        }
+      ]
+    }
+  }
+]

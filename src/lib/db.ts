@@ -38,6 +38,15 @@ export async function getIcon(id: number): Promise<Icon | null> {
   return rows[0] ?? null;
 }
 
+/** A public (validated) icon by its name. */
+export async function getValidatedIconByName(name: string): Promise<Icon | null> {
+  const rows = (await sql`
+    SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons
+    WHERE name = ${name} AND status = 'validated'
+  `) as Icon[];
+  return rows[0] ?? null;
+}
+
 /** 1-based rank of a validated icon among validated icons, oldest first; null when it isn't validated. */
 export async function getIconPosition(id: number): Promise<{ index: number; total: number } | null> {
   const [row] = await sql`
