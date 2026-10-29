@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { getValidatedIconByName } from "@/lib/db";
 import { STYLES } from "@/lib/svg";
-import { SHIPPING_COUNTRIES, SHIPPING_PRICE, findColor, findInk, findProduct, isStyle, isVariant, priceOf } from "@/lib/merch/products";
+import { SHIPPING_COUNTRIES, SHIPPING_PRICE, findColor, findProduct, findProductInk, isStyle, isVariant, priceOf } from "@/lib/merch/products";
 import { stripe } from "@/lib/merch/stripe";
 import { SITE_URL } from "@/lib/merch/printful";
 
@@ -19,8 +19,8 @@ export type Design = { product: string; icon: string; style: string; variant: st
  */
 export async function startCheckout(design: Design) {
   const product = findProduct(design.product);
-  const ink = findInk(design.ink);
   const color = product && findColor(product, design.color);
+  const ink = product && findProductInk(product, design.ink);
   const sized = color?.sizes.find((s) => s.size === design.size);
   if (!product || !ink || !color || !sized || !isStyle(design.style) || !isVariant(design.variant)) {
     throw new Error("Invalid design");
@@ -30,7 +30,7 @@ export async function startCheckout(design: Design) {
 
   const style = STYLES.find((s) => s.id === design.style)!.label;
   const origin = (await headers()).get("origin") ?? SITE_URL;
-  const back = `/shop?${new URLSearchParams({ icon: icon.name, style: design.style, variant: design.variant, ink: ink.hex.slice(1), color: color.name.toLowerCase(), size: sized.size })}`;
+  const back = `/shop?${new URLSearchParams({ product: product.slug, icon: icon.name, style: design.style, variant: design.variant, ink: ink.hex.slice(1), color: color.name.toLowerCase(), size: sized.size })}`;
 
   const session = await stripe().checkout.sessions.create({
     mode: "payment",

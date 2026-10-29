@@ -21,6 +21,7 @@
         "height": 1520
       }
     },
+    "photo": null,
     "colors": [
       {
         "name": "Anthracite",
@@ -586,23 +587,8 @@
             "cost": 12.19
           },
           {
-            "size": "S",
-            "variantId": 11864,
-            "cost": 12.19
-          },
-          {
-            "size": "M",
-            "variantId": 11865,
-            "cost": 12.19
-          },
-          {
             "size": "L",
             "variantId": 11866,
-            "cost": 12.19
-          },
-          {
-            "size": "XL",
-            "variantId": 11867,
             "cost": 12.19
           },
           {
@@ -675,5 +661,43 @@
         }
       ]
     }
+  },
+  {
+    "id": 407,
+    "name": "Enamel Mug",
+    "placement": "default",
+    "technique": "sublimation",
+    "printArea": {
+      "width": 8,
+      "height": 2.4,
+      "dpi": 300
+    },
+    "shipping": 4.49,
+    "template": {
+      "image": null,
+      "width": 728,
+      "height": 728,
+      "area": {
+        "left": 15,
+        "top": 215,
+        "width": 698,
+        "height": 210
+      }
+    },
+    "photo": "/merch/407.jpg",
+    "colors": [
+      {
+        "name": "White",
+        "hex": "#ffffff",
+        "sizes": [
+          {
+            "size": "12 oz",
+            "variantId": 11189,
+            "cost": 10.71
+          }
+        ]
+      }
+    ],
+    "sizeChart": null
   }
 ]

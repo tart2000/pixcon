@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { stripe } from "@/lib/merch/stripe";
 import { createDraftOrder, SITE_URL } from "@/lib/merch/printful";
-import { SHIPPING_PRICE, findInk, findProduct, isStyle, isVariant, printUrl } from "@/lib/merch/products";
+import { SHIPPING_PRICE, findProduct, findProductInk, isStyle, isVariant, printUrl } from "@/lib/merch/products";
 
 /**
  * Stripe calls this when a checkout is paid: we pass the order on to Printful, as a draft.
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 async function sendToPrintful(session: Stripe.Checkout.Session) {
   const m = session.metadata ?? {};
   const product = findProduct(m.product);
-  const ink = findInk(m.ink);
+  const ink = product && findProductInk(product, m.ink);
   if (!product || !ink || !isStyle(m.style) || !isVariant(m.variant) || !m.icon || !m.variant_id) {
     throw new Error(`Unexpected metadata: ${JSON.stringify(m)}`);
   }

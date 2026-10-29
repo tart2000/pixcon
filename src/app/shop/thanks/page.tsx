@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { stripe } from "@/lib/merch/stripe";
+import { findProduct } from "@/lib/merch/products";
 
 export const metadata = { title: "Thank you", robots: { index: false } };
 
@@ -9,6 +10,7 @@ export default async function ThanksPage({ searchParams }: PageProps<"/shop/than
   const id = (await searchParams).session_id;
   const session = typeof id === "string" ? await stripe().checkout.sessions.retrieve(id).catch(() => null) : null;
   const paid = session?.payment_status === "paid";
+  const product = findProduct(session?.metadata?.product);
   const name = session?.collected_information?.shipping_details?.name?.split(" ")[0];
 
   return (
@@ -18,8 +20,8 @@ export default async function ThanksPage({ searchParams }: PageProps<"/shop/than
         {paid ? (
           <>
             Your order is in. A receipt is on its way to{" "}
-            <span className="text-foreground">{session.customer_details?.email}</span>. Your T-shirt is printed on
-            demand and usually arrives within 5 to 10 business days.
+            <span className="text-foreground">{session.customer_details?.email}</span>. Your{" "}
+            {product?.slug === "mug" ? "mug" : "T-shirt"} is printed on demand and usually arrives within 5 to 10 business days.
           </>
         ) : (
           "We couldn't find this payment. If you were charged, reply to your receipt and we'll sort it out."

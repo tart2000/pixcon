@@ -3,17 +3,25 @@ import { iconPath, STYLES, type StyleId } from "../svg";
 import { decode, VARIANTS, type Variant } from "../pixels";
 import { PALETTE } from "../palette";
 
-type CatalogProduct = (typeof catalog)[number];
+type RawProduct = (typeof catalog)[number];
+/** A catalog.json product; mugs have no photo (`template.image`) and no size chart. */
+type CatalogProduct = Omit<RawProduct, "template" | "sizeChart"> & {
+  template: Omit<RawProduct["template"], "image"> & { image: string | null };
+  sizeChart: Extract<RawProduct["sizeChart"], object> | null;
+};
 export type ProductColor = CatalogProduct["colors"][number];
 
 /** A Printful product, keeping only the sizes we sell (in its colours and its size chart). */
 function withSizes(id: number, sizes: string[]): CatalogProduct {
-  const p = catalog.find((x) => x.id === id)!;
+  const p: CatalogProduct = catalog.find((x) => x.id === id)!;
   const keep = <T,>(values: Record<string, T>) => Object.fromEntries(Object.entries(values).filter(([s]) => sizes.includes(s)));
   return {
     ...p,
     colors: p.colors.map((c) => ({ ...c, sizes: c.sizes.filter((s) => sizes.includes(s.size)) })),
-    sizeChart: { ...p.sizeChart, rows: p.sizeChart.rows.map((r) => ({ ...r, values: keep(r.values) as typeof r.values })) },
+    sizeChart: p.sizeChart && {
+      ...p.sizeChart,
+      rows: p.sizeChart.rows.map((r) => ({ ...r, values: keep(r.values) as typeof r.values })),
+    },
   };
 }
 
@@ -29,9 +37,34 @@ export const PRODUCTS = [
     catalog: withSizes(456, ["XS", "S", "M", "L", "XL", "2XL"]),
     /** Price of the cheapest size in euros, VAT included; bigger sizes add what they cost us more (see priceOf). */
     basePrice: 28,
-    /** Where the icon sits on the print area, in inches: centred horizontally, `top` from its top edge. */
-    design: { label: "Large front", width: 9, top: 1 },
+    /**
+     * Where the icon sits on the print area, in inches: `width` wide, `top` from its top edge, and
+     * centred on each of `centers` (fractions of the print area's width).
+     */
+    design: { label: "Large front", width: 9, top: 1, centers: [0.5] },
+    colorLabel: "T-shirt colour",
     defaultColor: "White",
+    /** Whether white ink can be printed (sublimation can't: white is the bare product). */
+    whiteInk: true,
+    photoFace: null,
+  },
+  {
+    slug: "mug",
+    label: "Enamel mug",
+    description: "White enamel with a silver rim, 12 oz (350 ml)",
+    catalog: withSizes(407, ["12 oz"]),
+    basePrice: 22,
+    // Printed all around: one icon on each side of the handle, where Printful's guide centres the
+    // two faces (the print area starts and ends at the handle).
+    design: { label: "Wrap, one icon on each side", width: 2.3, top: 0.05, centers: [0.186, 0.814] },
+    colorLabel: "Mug colour",
+    defaultColor: "White",
+    whiteInk: false,
+    /**
+     * Where the print area's middle falls on the blank photo (catalog `photo`, handle on the left), in
+     * its pixels, and how many of them make an inch there: the preview draws the facing icon on it.
+     */
+    photoFace: { x: 550, y: 588, inch: 145 },
   },
 ] as const;
 
@@ -47,6 +80,12 @@ export const INKS = [
 ];
 
 export const findInk = (hex: string | null | undefined) => INKS.find((i) => i.hex === hex?.toLowerCase());
+
+/** Ink colours a product can be printed in. */
+export const inksOf = (product: Product) => (product.whiteInk ? INKS : INKS.filter((i) => i.name !== "White"));
+
+export const findProductInk = (product: Product, hex: string | null | undefined) =>
+  inksOf(product).find((i) => i.hex === hex?.toLowerCase());
 
 export const findColor = (product: Product, name: string | null | undefined) =>
   product.catalog.colors.find((c) => c.name.toLowerCase() === name?.toLowerCase());
@@ -80,21 +119,23 @@ export const isVariant = (v: string | null | undefined): v is Variant => VARIANT
 
 /**
  * The print file's layout, in its pixels: the print area at the resolution Printful expects
- * (`width` × `height`), and the icon's square (`x`, `y`, `side`) on it.
+ * (`width` × `height`), and the icon's squares (each at `xs`, `y`, `side` wide) on it.
  */
 export function printLayout(product: Product) {
   const { width, height, dpi } = product.catalog.printArea;
   const side = product.design.width * dpi;
-  return { width: width * dpi, height: height * dpi, x: ((width - product.design.width) / 2) * dpi, y: product.design.top * dpi, side };
+  const xs = product.design.centers.map((c) => c * width * dpi - side / 2);
+  return { width: width * dpi, height: height * dpi, xs, y: product.design.top * dpi, side };
 }
 
 /** The print file as an SVG: the whole print area, transparent, with the icon placed on it. */
 export function printSvg(product: Product, pixels: string, style: StyleId, ink: string) {
-  const { width, height, x, y, side } = printLayout(product);
+  const { width, height, xs, y, side } = printLayout(product);
+  const path = iconPath(decode(pixels), style);
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
-    `<svg x="${x}" y="${y}" width="${side}" height="${side}" viewBox="0 0 110 110" fill="${ink}">` +
-    `<path d="${iconPath(decode(pixels), style)}"/></svg></svg>`
+    xs.map((x) => `<svg x="${x}" y="${y}" width="${side}" height="${side}" viewBox="0 0 110 110" fill="${ink}"><path d="${path}"/></svg>`).join("") +
+    `</svg>`
   );
 }
 

@@ -1,6 +1,6 @@
 import { Resvg } from "@resvg/resvg-js";
 import { getValidatedIconByName } from "@/lib/db";
-import { findInk, findProduct, isStyle, isVariant, printSvg } from "@/lib/merch/products";
+import { findProduct, findProductInk, isStyle, isVariant, printSvg } from "@/lib/merch/products";
 
 /**
  * Print file of a design, as Printful expects it: a transparent PNG covering the whole print area.
@@ -9,7 +9,7 @@ import { findInk, findProduct, isStyle, isVariant, printSvg } from "@/lib/merch/
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const product = findProduct(params.get("product"));
-  const ink = findInk(`#${params.get("ink")}`);
+  const ink = product && findProductInk(product, `#${params.get("ink")}`);
   const style = params.get("style");
   const variant = params.get("variant");
   const name = params.get("icon");
