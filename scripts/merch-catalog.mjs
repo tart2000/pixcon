@@ -11,9 +11,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 const PRODUCTS = [
   { id: 456, placement: "front", technique: "dtg" },
   { id: 407, placement: "default", technique: "sublimation" },
+  // Its mockup template is an empty image: the shop draws the sticker itself.
+  { id: 358, placement: "default", technique: "digital", sizes: ["3″×3″"], drawn: true },
 ];
 
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "12 oz"];
+const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "12 oz", "3″×3″"];
 
 /** Colours of products that list none (the enamel mug only comes in white). */
 const COLOR_HEX = { White: "#ffffff" };
@@ -60,7 +62,7 @@ async function all(path, limit = 100) {
 }
 
 const catalog = [];
-for (const { id, placement, technique, sizes } of PRODUCTS) {
+for (const { id, placement, technique, sizes, drawn } of PRODUCTS) {
   const { data: product } = await get(`/catalog-products/${id}`);
   // Only the sizes we sell, in stock for Europe (some colours can't be made there).
   const { data: availability } = await get(`/catalog-products/${id}/availability?selling_region_name=europe&limit=100`);
@@ -127,7 +129,9 @@ for (const { id, placement, technique, sizes } of PRODUCTS) {
     writeFile(new URL(`../public${path}`, import.meta.url), Buffer.from(await (await fetch(url)).arrayBuffer()));
   let image = null;
   let photo = null;
-  if (template.role === "primary") {
+  if (drawn) {
+    // Nothing to download.
+  } else if (template.role === "primary") {
     image = `/merch/${id}-${placement}.png`;
     await save(image, template.image_url);
   } else {

@@ -10,6 +10,7 @@ import {
   PRODUCTS,
   SHIPPING_PRICE,
   VAT,
+  cm,
   findColor,
   findProduct,
   findProductInk,
@@ -97,7 +98,8 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
     if (!c.sizes.some((s) => s.size === size)) setSize(defaultSize(c).size);
   };
 
-  // Mirror the design in the URL so it can be shared or bookmarked.
+  // Mirror the design in the URL so it can be shared or bookmarked; colour and size only when
+  // there's a choice (single sizes are Printful's, in inches).
   useEffect(() => {
     if (!icon) return;
     const params = new URLSearchParams({
@@ -106,8 +108,8 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
       style,
       variant: shownVariant,
       ink: ink.slice(1),
-      color: color.name.toLowerCase(),
-      size: sized.size,
+      ...(product.catalog.colors.length > 1 && { color: color.name.toLowerCase() }),
+      ...(color.sizes.length > 1 && { size: sized.size }),
     });
     window.history.replaceState(null, "", `?${params}`);
   }, [product, icon, style, shownVariant, ink, color, sized]);
@@ -121,11 +123,13 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
         <div className="flex flex-col gap-3 md:sticky md:top-20">
           {product.slug === "mug" ? (
             <MugPreview product={product} pixels={pixels} style={style} ink={ink} />
+          ) : product.slug === "sticker" ? (
+            <StickerPreview product={product} pixels={pixels} style={style} ink={ink} />
           ) : (
             <ProductPreview product={product} color={color} pixels={pixels} style={style} ink={ink} />
           )}
           <p className="text-center text-xs text-muted">
-            Preview · {product.design.label}, {product.design.width}″ wide
+            Preview · {product.design.label} · icon {cm(product.design.width)} wide
           </p>
         </div>
 
@@ -224,7 +228,7 @@ function ProductTabs({
   onChange: (p: Product) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:max-w-md" role="radiogroup" aria-label="Product">
+    <div className="grid grid-cols-3 gap-2 sm:max-w-2xl sm:gap-3" role="radiogroup" aria-label="Product">
       {PRODUCTS.map((p) => {
         const glyph = icons.find((i) => i.name === p.slug);
         const active = p.slug === value.slug;
@@ -236,18 +240,43 @@ function ProductTabs({
             aria-checked={active}
             aria-label={p.label}
             onClick={() => onChange(p)}
-            className={`flex items-center gap-2 rounded-xl border-2 px-3 py-3 text-left whitespace-nowrap sm:gap-3 sm:px-4 transition-colors ${
+            className={`flex flex-col items-center gap-2 rounded-xl border-2 px-2 py-3 text-center whitespace-nowrap sm:flex-row sm:gap-3 sm:px-4 sm:text-left transition-colors ${
               active ? "border-foreground bg-foreground text-on-foreground" : "border-border hover:border-border-strong"
             }`}
           >
             {glyph && <IconGlyph pixels={glyph.pixels} style={style} size={40} className="shrink-0" />}
-            <span className="flex flex-col">
-              <span className="font-display text-xl leading-none sm:text-2xl">{p.slug === "mug" ? "Mug" : "T-shirt"}</span>
+            <span className="flex flex-col items-center sm:items-start">
+              <span className="font-display text-xl leading-none sm:text-2xl">{p.name}</span>
               <span className={`text-xs ${active ? "text-on-foreground/70" : "text-muted"}`}>from {euros.format(from)}</span>
             </span>
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * The sticker on its 3″ backing sheet: the icon on its white rounded square (what we print),
+ * kiss-cut by Printful with a white border around it.
+ */
+function StickerPreview({ product, pixels, style, ink }: { product: Product; pixels: string; style: StyleId; ink: string }) {
+  // In icon units (110 = the icon's 2.5″, so the 3″ sheet is 132): our square plus Printful's ⅛″ border.
+  const pad = (product.design.backing ?? 0) + 5.5;
+  return (
+    <div className="flex aspect-square items-center justify-center rounded-lg border border-border bg-subtle p-[12%]">
+      <svg viewBox="-11 -11 132 132" className="size-full rounded-sm bg-[#f7f7f5] shadow-md" aria-hidden>
+        <rect
+          x={-pad}
+          y={-pad}
+          width={110 + 2 * pad}
+          height={110 + 2 * pad}
+          rx={pad * 1.6}
+          fill="#ffffff"
+          style={{ filter: "drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.25))" }}
+        />
+        <path d={iconPath(decode(pixels), style)} fill={ink} />
+      </svg>
     </div>
   );
 }

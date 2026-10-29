@@ -30,7 +30,15 @@ export async function startCheckout(design: Design) {
 
   const style = STYLES.find((s) => s.id === design.style)!.label;
   const origin = (await headers()).get("origin") ?? SITE_URL;
-  const back = `/shop?${new URLSearchParams({ product: product.slug, icon: icon.name, style: design.style, variant: design.variant, ink: ink.hex.slice(1), color: color.name.toLowerCase(), size: sized.size })}`;
+  const back = `/shop?${new URLSearchParams({
+    product: product.slug,
+    icon: icon.name,
+    style: design.style,
+    variant: design.variant,
+    ink: ink.hex.slice(1),
+    ...(product.catalog.colors.length > 1 && { color: color.name.toLowerCase() }),
+    ...(color.sizes.length > 1 && { size: sized.size }),
+  })}`;
 
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
@@ -44,7 +52,12 @@ export async function startCheckout(design: Design) {
           tax_behavior: "inclusive",
           product_data: {
             name: `${product.label} · ${icon.name}`,
-            description: `${style} ${design.variant} icon in ${ink.name.toLowerCase()} · ${color.name} · ${sized.size}`,
+            // Colour and size only when there's a choice (Printful's mug and sticker sizes are in inches).
+            description: [
+              `${style} ${design.variant} icon in ${ink.name.toLowerCase()}`,
+              ...(product.catalog.colors.length > 1 ? [color.name] : []),
+              ...(color.sizes.length > 1 ? [sized.size] : []),
+            ].join(" · "),
             tax_code: TAX_CODE_GOODS,
           },
         },

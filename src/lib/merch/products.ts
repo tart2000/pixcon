@@ -32,6 +32,8 @@ function withSizes(id: number, sizes: string[]): CatalogProduct {
 export const PRODUCTS = [
   {
     slug: "tshirt",
+    /** Short name, on the product buttons and in the thank-you page. */
+    name: "T-shirt",
     label: "Organic T-shirt",
     description: "Stanley/Stella Creator 2.0 · 100% organic cotton, 180 g/m²",
     catalog: withSizes(456, ["XS", "S", "M", "L", "XL", "2XL"]),
@@ -39,9 +41,10 @@ export const PRODUCTS = [
     basePrice: 28,
     /**
      * Where the icon sits on the print area, in inches: `width` wide, `top` from its top edge, and
-     * centred on each of `centers` (fractions of the print area's width).
+     * centred on each of `centers` (fractions of the print area's width). `backing`, when set, prints
+     * a white rounded square under the icon reaching that far past it, in icon units (the icon is 110 wide).
      */
-    design: { label: "Large front", width: 9, top: 1, centers: [0.5] },
+    design: { label: "Large front", width: 9, top: 1, centers: [0.5], backing: null },
     colorLabel: "T-shirt colour",
     defaultColor: "White",
     /** Whether white ink can be printed (sublimation can't: white is the bare product). */
@@ -50,13 +53,14 @@ export const PRODUCTS = [
   },
   {
     slug: "mug",
+    name: "Mug",
     label: "Enamel mug",
-    description: "White enamel with a silver rim, 12 oz (350 ml)",
+    description: "White enamel with a silver rim, 350 ml",
     catalog: withSizes(407, ["12 oz"]),
     basePrice: 22,
     // Printed all around: one icon on each side of the handle, where Printful's guide centres the
     // two faces (the print area starts and ends at the handle).
-    design: { label: "Wrap, one icon on each side", width: 2.3, top: 0.05, centers: [0.186, 0.814] },
+    design: { label: "Wrap, one icon on each side", width: 2.3, top: 0.05, centers: [0.186, 0.814], backing: null },
     colorLabel: "Mug colour",
     defaultColor: "White",
     whiteInk: false,
@@ -66,11 +70,31 @@ export const PRODUCTS = [
      */
     photoFace: { x: 550, y: 588, inch: 145 },
   },
+  {
+    slug: "sticker",
+    name: "Sticker",
+    label: "Kiss-cut sticker",
+    description: "White vinyl, cut as a rounded square, on a 7.6 × 7.6 cm sheet",
+    catalog: withSizes(358, ["3″×3″"]),
+    basePrice: 5,
+    // Printful cuts around whatever isn't transparent, adding a white border. Cut around the icon
+    // itself, shapes come out jagged: we print it on a white rounded square, so every sticker is a
+    // clean square, with room for Printful's border in the 3″ sheet.
+    design: { label: "Rounded square", width: 2.5, top: 0.25, centers: [0.5], backing: 4 },
+    colorLabel: "Sticker colour",
+    defaultColor: "White",
+    // Printed on white vinyl: white ink wouldn't show.
+    whiteInk: false,
+    photoFace: null,
+  },
 ] as const;
 
 export type Product = (typeof PRODUCTS)[number];
 
 export const findProduct = (slug: string | null | undefined) => PRODUCTS.find((p) => p.slug === slug);
+
+/** Inches (Printful's unit) shown in centimetres. */
+export const cm = (inches: number) => `${(inches * 2.54).toLocaleString("en", { maximumFractionDigits: 1 })} cm`;
 
 /** Ink colours offered for the icon: black, white and the site's palette. */
 export const INKS = [
@@ -131,10 +155,14 @@ export function printLayout(product: Product) {
 /** The print file as an SVG: the whole print area, transparent, with the icon placed on it. */
 export function printSvg(product: Product, pixels: string, style: StyleId, ink: string) {
   const { width, height, xs, y, side } = printLayout(product);
-  const path = iconPath(decode(pixels), style);
+  const { backing } = product.design;
+  const under = backing
+    ? `<rect x="${-backing}" y="${-backing}" width="${110 + 2 * backing}" height="${110 + 2 * backing}" rx="${backing * 2}" fill="#fff"/>`
+    : "";
+  const icon = `<path d="${iconPath(decode(pixels), style)}" fill="${ink}"/>`;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
-    xs.map((x) => `<svg x="${x}" y="${y}" width="${side}" height="${side}" viewBox="0 0 110 110" fill="${ink}"><path d="${path}"/></svg>`).join("") +
+    xs.map((x) => `<g transform="translate(${x} ${y}) scale(${side / 110})">${under}${icon}</g>`).join("") +
     `</svg>`
   );
 }

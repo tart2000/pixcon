@@ -21,7 +21,7 @@ export default async function ThanksPage({ searchParams }: PageProps<"/shop/than
           <>
             Your order is in. A receipt is on its way to{" "}
             <span className="text-foreground">{session.customer_details?.email}</span>. Your{" "}
-            {product?.slug === "mug" ? "mug" : "T-shirt"} is printed on demand and usually arrives within 5 to 10 business days.
+            {product?.slug === "tshirt" ? "T-shirt" : (product?.name.toLowerCase() ?? "order")} is printed on demand and usually arrives within 5 to 10 business days.
           </>
         ) : (
           "We couldn't find this payment. If you were charged, reply to your receipt and we'll sort it out."

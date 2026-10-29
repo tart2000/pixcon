@@ -699,5 +699,43 @@
       }
     ],
     "sizeChart": null
+  },
+  {
+    "id": 358,
+    "name": "Kiss-Cut Stickers",
+    "placement": "default",
+    "technique": "digital",
+    "printArea": {
+      "width": 3,
+      "height": 3,
+      "dpi": 300
+    },
+    "shipping": 3.69,
+    "template": {
+      "image": null,
+      "width": 1000,
+      "height": 1000,
+      "area": {
+        "left": 249,
+        "top": 249,
+        "width": 502,
+        "height": 502
+      }
+    },
+    "photo": null,
+    "colors": [
+      {
+        "name": "White",
+        "hex": "#ffffff",
+        "sizes": [
+          {
+            "size": "3″×3″",
+            "variantId": 10163,
+            "cost": 1.99
+          }
+        ]
+      }
+    ],
+    "sizeChart": null
   }
 ]
