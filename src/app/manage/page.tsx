@@ -8,8 +8,9 @@ import { publishKitNow } from "@/app/actions";
 
 export const metadata = pageMeta(canEdit ? "Manage" : "Requests", "Request a pixel icon and follow its progress.", "/manage");
 
-export default async function ManagePage() {
+export default async function ManagePage({ searchParams }: PageProps<"/manage">) {
   await connection();
+  const { q } = await searchParams;
   const icons = await listIcons();
   const rebuild = canEdit ? pendingKitRebuild() : null;
 
@@ -37,6 +38,7 @@ export default async function ManagePage() {
         </form>
       )}
       <ManageList
+        initialQuery={typeof q === "string" ? q : ""}
         icons={icons.map((i) => ({
           id: i.id,
           name: i.name,

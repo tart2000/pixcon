@@ -45,11 +45,12 @@ const compare: Record<Sort, (a: Item, b: Item) => number> = {
 
 const isBlank = (pixels: string | null) => !pixels || !pixels.includes("1");
 
-export function ManageList({ icons }: { icons: Item[] }) {
+/** `initialQuery` prefills the search-or-request field, e.g. from a search that found nothing on /icons. */
+export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initialQuery?: string }) {
   const [filter, setFilter] = useState<Status | "all">("all");
   const [sort, setSort] = useState<Sort>("updated");
   // One field to both search and request: typing filters the list, so duplicates show up before asking.
-  const [request, setRequest] = useState("");
+  const [request, setRequest] = useState(initialQuery);
   const [requested, setRequested] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();

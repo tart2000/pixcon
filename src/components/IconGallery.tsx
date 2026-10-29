@@ -31,6 +31,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   const openName = params.get("icon");
   const setQuery = (q: string) => setUrl("replace", urlWith({ q }));
   const filtered = useMemo(() => icons.filter((i) => matchesQuery(i, query)), [icons, query]);
+  const robot = icons.find((i) => i.name === "robot");
   const pushed = useRef(false);
   const searchRef = useRef<HTMLInputElement>(null);
   // Browse the filtered list, unless a shared link points outside it.
@@ -119,10 +120,33 @@ export function IconGallery({ icons }: { icons: Item[] }) {
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-20 text-center">
-          <p className="text-sm text-muted">{icons.length === 0 ? "No icons yet." : "No icons match your search."}</p>
-          {icons.length === 0 && canEdit && (
-            <Link href="/new" className="btn">
-              Draw the first one
+          {icons.length === 0 ? (
+            <>
+              <p className="text-sm text-muted">No icons yet.</p>
+              {canEdit && (
+                <Link href="/new" className="btn">
+                  Draw the first one
+                </Link>
+              )}
+            </>
+          ) : (
+            // Nothing found: offer to request it, with the search carried over to /manage.
+            <Link
+              href={`/manage?q=${encodeURIComponent(query.trim())}`}
+              className="group flex flex-col items-center gap-4 px-6"
+            >
+              {robot && (
+                <IconGlyph
+                  pixels={robot.pixels}
+                  style={style}
+                  size={112}
+                  color={color}
+                  className="transition-transform group-hover:-rotate-6 group-hover:scale-110"
+                />
+              )}
+              <span className="font-display text-3xl">No icon for “{query.trim()}” yet</span>
+              <span className="btn-primary h-11 px-5 text-base">Ask for it</span>
+              <span className="text-sm text-muted">Then follow its progress on the requests page.</span>
             </Link>
           )}
         </div>
