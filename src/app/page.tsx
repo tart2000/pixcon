@@ -27,7 +27,7 @@ const FAMILIES = [
   { tag: "food", label: "Food", icons: ["candy", "barbecue", "icecream-cone", "cherries", "coffee", "cheese"] },
   { tag: "game", label: "Games", icons: ["dice-five", "gamepad", "joystick", "bowling-ball", "trophy", "axe-battle"] },
   { tag: "transport", label: "Transport", icons: ["roller", "bicycle", "bus", "truck-side", "scooter", "helicopter"] },
-  { tag: "ui", label: "UI", icons: ["arrows-clockwise", "toggle-on", "cursor-text", "funnel", "download", "info-circle"] },
+  { tag: "interface", label: "Interface", icons: ["arrows-clockwise", "toggle-on", "cursor-text", "funnel", "download", "info-circle"] },
   { tag: "human", label: "Human", icons: ["scout", "person-biking", "person", "eyes-frown", "hand-horns", "thumbs-up"] },
 ];
 
