@@ -68,6 +68,8 @@ export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initia
   }, [icons, filter, request, sort]);
   // Name sorting has nothing to show in the last column: keep the update date there.
   const column = sort === "name" ? "updated" : sort;
+  // Views and downloads add up over the rows shown, so filtering gives that group's total.
+  const total = column === "views" || column === "downloads" ? rows.reduce((sum, i) => sum + i[column], 0) : null;
 
   const slug = toSlug(request);
   const existing = slug ? icons.find((i) => i.name === slug) : undefined;
@@ -175,7 +177,10 @@ export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initia
           <span>Regular · Fill</span>
           <span>Name</span>
           <span>Status</span>
-          <span>{SORTS.find((s) => s.id === column)!.label}</span>
+          <span>
+            {SORTS.find((s) => s.id === column)!.label}
+            {total !== null && ` · ${total.toLocaleString("en")}`}
+          </span>
           {canEdit && <span />}
         </div>
         {rows.length === 0 ? (
