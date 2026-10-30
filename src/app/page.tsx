@@ -34,7 +34,7 @@ const FAMILIES = [
 ];
 
 /** Designs shown in the home page's shop section, one per product (in black, ready to order). */
-const SHOP: Record<(typeof PRODUCTS)[number]["slug"], string> = { tshirt: "poop-smile", mug: "campfire", sticker: "cheese" };
+const SHOP: Record<(typeof PRODUCTS)[number]["slug"], string> = { tshirt: "poop-smile", mug: "campfire", sticker: "skull" };
 
 const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 
