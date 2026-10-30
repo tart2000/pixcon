@@ -6,10 +6,12 @@ import { STYLES, type StyleId } from "@/lib/svg";
 import { IconGlyph } from "@/components/IconGlyph";
 import { HeroPattern } from "@/components/home/HeroPattern";
 import { LibraryPreview } from "@/components/home/LibraryPreview";
+import { ProductPreview, ProductTabLabel, productTabClass } from "@/components/shop/ProductVisuals";
 import { CodeBlock } from "@/components/CodeBlock";
 import { KIT_SCRIPT } from "@/lib/kit";
 import { kitSizeKB } from "@/lib/kitSize";
 import { canEdit } from "@/lib/editing";
+import { INKS, PRODUCTS, findColor } from "@/lib/merch/products";
 
 /** Icons shown in the library preview, when they exist. */
 const PREVIEW = [
@@ -30,6 +32,9 @@ const FAMILIES = [
   { tag: "interface", label: "Interface", icons: ["arrows-clockwise", "toggle-on", "cursor-text", "funnel", "download", "info-circle"] },
   { tag: "human", label: "Human", icons: ["scout", "person-biking", "person", "eyes-frown", "hand-horns", "thumbs-up"] },
 ];
+
+/** Designs shown in the home page's shop section, one per product (in black, ready to order). */
+const SHOP: Record<(typeof PRODUCTS)[number]["slug"], string> = { tshirt: "poop-smile", mug: "campfire", sticker: "cheese" };
 
 const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 
@@ -191,6 +196,39 @@ export default async function Home() {
       <section className="flex flex-col gap-8">
         <SectionTitle eyebrow="The library" title="Pick one, make it yours." />
         <LibraryPreview icons={preview} total={icons.length} />
+      </section>
+
+      <section className="flex flex-col gap-8">
+        <SectionTitle eyebrow="The shop" title="Wear it, sip it, stick it." />
+        <div className="grid gap-6 sm:grid-cols-3">
+          {PRODUCTS.map((p) => {
+            const icon = byName.get(SHOP[p.slug]);
+            if (!icon) return null;
+            const design = new URLSearchParams({
+              product: p.slug,
+              icon: icon.name,
+              style: "liquid-blob",
+              variant: "regular",
+              ink: INKS[0].hex.slice(1),
+            });
+            return (
+              <Link key={p.slug} href={`/shop?${design}`} aria-label={`${p.label} with the ${icon.name} icon`} className="group flex flex-col gap-3">
+                <ProductPreview
+                  product={p}
+                  color={findColor(p, p.defaultColor)!}
+                  pixels={icon.pixels}
+                  style="liquid-blob"
+                  ink={INKS[0].hex}
+                />
+                <span
+                  className={`${productTabClass(false)} group-hover:border-foreground group-hover:bg-foreground group-hover:text-on-foreground`}
+                >
+                  <ProductTabLabel product={p} pixels={byName.get(p.slug)?.pixels} style="liquid-blob" />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       <section className="flex flex-col gap-8">

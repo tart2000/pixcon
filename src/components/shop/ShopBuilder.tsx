@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { iconPath, type StyleId } from "@/lib/svg";
+import { VARIANTS, type Variant } from "@/lib/pixels";
+import type { StyleId } from "@/lib/svg";
 import { matchesQuery } from "@/lib/alts";
 import { canEdit } from "@/lib/editing";
 import {
@@ -18,7 +18,6 @@ import {
   isStyle,
   isVariant,
   priceOf,
-  printLayout,
   printUrl,
   withVat,
   type Product,
@@ -26,6 +25,7 @@ import {
 } from "@/lib/merch/products";
 import { startCheckout } from "@/app/shop/actions";
 import { IconGlyph } from "../IconGlyph";
+import { ProductPreview, ProductTabLabel, productTabClass } from "./ProductVisuals";
 import { Segmented } from "../Segmented";
 import { StyleSelect } from "../StyleSelect";
 import { CloseIcon } from "../UiIcons";
@@ -121,13 +121,7 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
       <ProductTabs icons={icons} style={style} value={product} onChange={pickProduct} />
       <div className="grid items-start gap-8 md:grid-cols-[1.15fr_1fr]">
         <div className="flex flex-col gap-3 md:sticky md:top-20">
-          {product.slug === "mug" ? (
-            <MugPreview product={product} pixels={pixels} style={style} ink={ink} />
-          ) : product.slug === "sticker" ? (
-            <StickerPreview product={product} pixels={pixels} style={style} ink={ink} />
-          ) : (
-            <ProductPreview product={product} color={color} pixels={pixels} style={style} ink={ink} />
-          )}
+          <ProductPreview product={product} color={color} pixels={pixels} style={style} ink={ink} />
           <p className="text-center text-xs text-muted">
             Preview · {product.design.label} · icon {cm(product.design.width)} wide
           </p>
@@ -230,9 +224,7 @@ function ProductTabs({
   return (
     <div className="grid grid-cols-3 gap-2 sm:max-w-2xl sm:gap-3" role="radiogroup" aria-label="Product">
       {PRODUCTS.map((p) => {
-        const glyph = icons.find((i) => i.name === p.slug);
         const active = p.slug === value.slug;
-        const from = Math.min(...p.catalog.colors.flatMap((c) => c.sizes.map((s) => priceOf(p, s.cost))));
         return (
           <button
             key={p.slug}
@@ -240,15 +232,9 @@ function ProductTabs({
             aria-checked={active}
             aria-label={p.label}
             onClick={() => onChange(p)}
-            className={`flex flex-col items-center gap-2 rounded-xl border-2 px-2 py-3 text-center whitespace-nowrap sm:flex-row sm:gap-3 sm:px-4 sm:text-left transition-colors ${
-              active ? "border-foreground bg-foreground text-on-foreground" : "border-border hover:border-border-strong"
-            }`}
+            className={productTabClass(active)}
           >
-            {glyph && <IconGlyph pixels={glyph.pixels} style={style} size={40} className="shrink-0" />}
-            <span className="flex flex-col items-center sm:items-start">
-              <span className="font-display text-xl leading-none sm:text-2xl">{p.name}</span>
-              <span className={`text-xs ${active ? "text-on-foreground/70" : "text-muted"}`}>from {euros.format(from)}</span>
-            </span>
+            <ProductTabLabel product={p} pixels={icons.find((i) => i.name === p.slug)?.pixels} style={style} active={active} />
           </button>
         );
       })}
@@ -256,113 +242,10 @@ function ProductTabs({
   );
 }
 
-/**
- * The sticker on its 3″ backing sheet: the icon on its white rounded square (what we print),
- * kiss-cut by Printful with a white border around it.
- */
-function StickerPreview({ product, pixels, style, ink }: { product: Product; pixels: string; style: StyleId; ink: string }) {
-  // In icon units (110 = the icon's 2.5″, so the 3″ sheet is 132): our square plus Printful's ⅛″ border.
-  const pad = (product.design.backing ?? 0) + 5.5;
-  return (
-    <div className="flex aspect-square items-center justify-center rounded-lg border border-border bg-subtle p-[12%]">
-      <svg viewBox="-11 -11 132 132" className="size-full rounded-sm bg-[#f7f7f5] shadow-md" aria-hidden>
-        <rect
-          x={-pad}
-          y={-pad}
-          width={110 + 2 * pad}
-          height={110 + 2 * pad}
-          rx={pad * 1.6}
-          fill="#ffffff"
-          style={{ filter: "drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.25))" }}
-        />
-        <path d={iconPath(decode(pixels), style)} fill={ink} />
-      </svg>
-    </div>
-  );
-}
-
-/**
- * Printful's photo of the blank mug (handle on the left) with the icon of the side facing us. It's
- * multiplied in, so it takes the enamel's shading.
- */
-function MugPreview({ product, pixels, style, ink }: { product: Product; pixels: string; style: StyleId; ink: string }) {
-  const photo = product.catalog.photo;
-  const face = product.photoFace;
-  if (!photo || !face) return null;
-  const side = product.design.width * face.inch;
-  const iconTop = face.y - (product.catalog.printArea.height / 2 - product.design.top) * face.inch;
-  const path = iconPath(decode(pixels), style);
-  return (
-    // The photo is 1000 px square: zoom in a little on the mug.
-    <svg viewBox="70 120 860 860" className="aspect-square w-full rounded-lg border border-border bg-[#f3f3f3]" aria-hidden>
-      <image href={photo} width={1000} height={1000} />
-      <svg
-        x={face.x - side / 2}
-        y={iconTop}
-        width={side}
-        height={side}
-        viewBox="0 0 110 110"
-        fill={ink}
-        style={{ mixBlendMode: "multiply" }}
-      >
-        <path d={path} />
-      </svg>
-    </svg>
-  );
-}
-
 /** Black on light colours, white on dark ones (when the product can print white). */
 function defaultInk(product: Product, c: ProductColor) {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.hex.slice(i, i + 2), 16));
   return 0.299 * r + 0.587 * g + 0.114 * b > 140 || !product.whiteInk ? INKS[0].hex : INKS[1].hex;
-}
-
-/**
- * The product photo, the way Printful builds its mockups: the shirt colour underneath, the design on
- * the print area, then the photo's shading on top (it's mostly transparent where the fabric is).
- */
-function ProductPreview({
-  product,
-  color,
-  pixels,
-  style,
-  ink,
-}: {
-  product: Product;
-  color: ProductColor;
-  pixels: string;
-  style: StyleId;
-  ink: string;
-}) {
-  const { template } = product.catalog;
-  const { width, height, xs, y, side } = printLayout(product);
-  const pct = (v: number, of: number) => `${(v / of) * 100}%`;
-  return (
-    <div
-      className="relative aspect-square overflow-hidden rounded-lg border border-border transition-colors"
-      style={{ background: color.hex }}
-    >
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="absolute"
-        style={{
-          left: pct(template.area.left, template.width),
-          top: pct(template.area.top, template.height),
-          width: pct(template.area.width, template.width),
-          height: pct(template.area.height, template.height),
-        }}
-        aria-hidden
-      >
-        {xs.map((x) => (
-          <svg key={x} x={x} y={y} width={side} height={side} viewBox="0 0 110 110" fill={ink}>
-            <path d={iconPath(decode(pixels), style)} />
-          </svg>
-        ))}
-      </svg>
-      {/* eslint-disable-next-line @next/next/no-img-element -- a static overlay, sized by its box. */}
-      <img src={template.image ?? undefined} alt="" className="pointer-events-none absolute inset-0 size-full" />
-    </div>
-  );
 }
 
 function Field({

@@ -138,6 +138,10 @@ export function priceOf(product: Product, cost: number) {
   return product.basePrice + Math.ceil(withVat(cost - min));
 }
 
+/** The product's lowest price, across its sizes. */
+export const fromPrice = (product: Product) =>
+  Math.min(...product.catalog.colors.flatMap((c) => c.sizes.map((s) => priceOf(product, s.cost))));
+
 export const isStyle = (s: string | null | undefined): s is StyleId => STYLES.some((x) => x.id === s);
 export const isVariant = (v: string | null | undefined): v is Variant => VARIANTS.some((x) => x.id === v);
 
