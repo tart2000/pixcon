@@ -58,6 +58,16 @@ body {
   overflow-x: clip;
 }
 
+/* Tailwind 4 leaves buttons on the default cursor. In the base layer, so cursor-* utilities still win. */
+@layer base {
+  button:not(:disabled),
+  select:not(:disabled),
+  summary,
+  [role="button"] {
+    cursor: pointer;
+  }
+}
+
 @layer components {
 .btn {
   @apply inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-subtle hover:border-border-strong disabled:pointer-events-none disabled:opacity-50;
