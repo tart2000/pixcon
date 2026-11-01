@@ -4,7 +4,7 @@ export const CATEGORIES = [
   { slug: "symbols", label: "Math & Symbols", icon: "math-operations", tags: ["symbols", "math", "astronomical-sign", "shape", "justice"] },
   { slug: "nature", label: "Nature & Weather", icon: "leaf", tags: ["nature", "weather", "sky", "sea", "tree", "forest"] },
   { slug: "travel", label: "Maps & Transport", icon: "map", tags: ["transport", "vehicle", "city", "travel", "map", "road", "outdoors"] },
-  { slug: "home", label: "Home & DIY", icon: "home", tags: ["home", "diy", "tool", "furniture", "construction", "clean", "garden", "bath"] },
+  { slug: "home", label: "Home & DIY", icon: "home", tags: ["home", "diy", "tool", "furniture", "clean", "garden", "bath"] },
   { slug: "media", label: "Media", icon: "music-note", tags: ["music", "sound", "film", "tv", "picture", "camera", "draw", "art"] },
   { slug: "food", label: "Food & Drink", icon: "hamburger", tags: ["food", "drink", "sweet", "fruit", "cook", "breakfast"] },
   { slug: "people", label: "People", icon: "person", tags: ["human", "face", "smiley", "body", "love"] },
