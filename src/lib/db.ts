@@ -31,6 +31,13 @@ export async function listIcons(status?: Status): Promise<Icon[]> {
   `) as Icon[];
 }
 
+/** Validated icons by name, as the gallery needs them. */
+export async function listGalleryIcons() {
+  return (await listIcons("validated"))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(({ id, name, alts, pixels, pixels_fill, views, downloads }) => ({ id, name, alts, pixels, fill: pixels_fill, views, downloads }));
+}
+
 export async function getIcon(id: number): Promise<Icon | null> {
   const rows = (await sql`
     SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons WHERE id = ${id}

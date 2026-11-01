@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { CATEGORIES, categoryPath } from "@/lib/categories";
 import { listIcons } from "@/lib/db";
 import { VARIANTS } from "@/lib/pixels";
 import { STYLES, type StyleId } from "@/lib/svg";
@@ -191,6 +192,9 @@ export default async function Home() {
             </li>
           ))}
         </ul>
+        <Link href={categoryPath(CATEGORIES[0].slug)} className="btn-fun self-center">
+          Browse by category
+        </Link>
       </section>
 
       <section className="flex flex-col gap-8">

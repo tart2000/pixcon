@@ -8,6 +8,6 @@ export const cleanAlts = (alts: string[]) => [...new Set(alts.map(normalizeAlt).
 
 /** Search match on the name or any alt. */
 export function matchesQuery(icon: { name: string; alts: string[] }, query: string) {
-  const q = query.trim().toLowerCase();
+  const q = normalizeAlt(query);
   return !q || icon.name.toLowerCase().includes(q) || icon.alts.some((a) => a.includes(q));
 }

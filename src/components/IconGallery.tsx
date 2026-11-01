@@ -2,7 +2,8 @@
 
 import { StyleSelect } from "./StyleSelect";
 import Link from "next/link";
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
 import { downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
@@ -10,6 +11,7 @@ import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
 import { matchesQuery } from "@/lib/alts";
+import { CATEGORIES, categoryPath, inCategory } from "@/lib/categories";
 import { canEdit } from "@/lib/editing";
 import { IconModal } from "./IconModal";
 import { recordDownload } from "@/app/actions";
@@ -30,7 +32,31 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   const query = params.get("q") ?? "";
   const openName = params.get("icon");
   const setQuery = (q: string) => setUrl("replace", urlWith({ q }));
-  const filtered = useMemo(() => icons.filter((i) => matchesQuery(i, query)), [icons, query]);
+  // The gallery stays full width until the categories are asked for (or a link opens one).
+  // Moving between categories keeps this page mounted, so the style and the size stay as they were.
+  const pathname = usePathname();
+  const category = CATEGORIES.find((c) => categoryPath(c.slug) === pathname);
+  const [categoriesOpen, setCategoriesOpen] = useState<boolean | null>(null);
+  const showCategories = categoriesOpen ?? !!category;
+  const setCategory = (slug: string | null) => {
+    setUrl("push", `${categoryPath(slug)}${location.search}`);
+    window.scrollTo({ top: 0 });
+  };
+  const hideCategories = () => {
+    setCategoriesOpen(false);
+    if (category) setCategory(null);
+  };
+  useEffect(() => {
+    document.title = `${category ? `${category.label} icons` : "Icons"} · Pixicons`;
+  }, [category]);
+  const filtered = useMemo(
+    () => icons.filter((i) => matchesQuery(i, query) && (!category || inCategory(category, i.alts))),
+    [icons, query, category],
+  );
+  const categoryTotals = useMemo(
+    () => CATEGORIES.map((c) => ({ ...c, total: icons.filter((i) => inCategory(c, i.alts)).length })),
+    [icons],
+  );
   const robot = icons.find((i) => i.name === "robot");
   const pushed = useRef(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -50,7 +76,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   /** A tag clicked in the popup: close it and search for that tag. */
   const showTag = (tag: string) => {
     pushed.current = false;
-    setUrl("replace", urlWith({ icon: null, q: tag }));
+    setUrl("replace", `${categoryPath()}${urlWith({ icon: null, q: tag })}`);
     window.scrollTo({ top: 0 });
   };
 
@@ -97,6 +123,21 @@ export function IconGallery({ icons }: { icons: Item[] }) {
           <StyleSelect value={style} onChange={setStyle} />
           <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
           <ColorPicker align="left" />
+          {/* One button to the eye, but two to click: the frame holds the toggle and its X. */}
+          <div className={`btn gap-0 p-0 ${showCategories || category ? "border-foreground" : ""}`}>
+            <button
+              className={`flex h-full items-center pl-3 ${showCategories || category ? "pr-1.5" : "pr-3"}`}
+              aria-expanded={showCategories}
+              onClick={() => setCategoriesOpen(!showCategories)}
+            >
+              {category ? category.label : "Categories"}
+            </button>
+            {(showCategories || category) && (
+              <button className="btn-icon mr-1 size-6" title="Hide categories" aria-label="Hide categories" onClick={hideCategories}>
+                <CloseIcon />
+              </button>
+            )}
+          </div>
           <label
             className="flex h-9 items-center gap-3 rounded-md border border-border bg-background px-3 sm:ml-auto"
             title="Preview size"
@@ -118,6 +159,34 @@ export function IconGallery({ icons }: { icons: Item[] }) {
         </div>
       </div>
 
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+      {showCategories && (
+        // A side list on large screens, a row to swipe through on small ones.
+        <nav
+          aria-label="Categories"
+          className="flex gap-1 overflow-x-auto rounded-lg border border-border bg-background p-2 lg:sticky lg:top-[13rem] lg:max-h-[calc(100vh-14rem)] lg:w-60 lg:shrink-0 lg:flex-col lg:overflow-y-auto"
+        >
+          {[{ slug: null, label: "All", icon: "pixcon", total: icons.length }, ...categoryTotals].map((c) => {
+            const glyph = icons.find((i) => i.name === c.icon);
+            const active = (category?.slug ?? null) === c.slug;
+            return (
+              <button
+                key={c.label}
+                aria-current={active ? "true" : undefined}
+                onClick={() => setCategory(c.slug)}
+                className={`flex shrink-0 items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-subtle ${
+                  active ? "bg-subtle font-semibold text-foreground" : "text-muted"
+                }`}
+              >
+                {glyph && <IconGlyph pixels={glyph.pixels} style={style} size={22} color={color} />}
+                <span>{c.label}</span>
+                <span className="font-mono text-xs lg:ml-auto">{c.total}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
+      <div className="min-w-0 flex-1">
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-20 text-center">
           {icons.length === 0 ? (
@@ -128,6 +197,14 @@ export function IconGallery({ icons }: { icons: Item[] }) {
                   Draw the first one
                 </Link>
               )}
+            </>
+          ) : category ? (
+            // It may well exist elsewhere: look everywhere before offering to request it.
+            <>
+              <p className="text-sm text-muted">Nothing in {category.label}.</p>
+              <button className="btn" onClick={() => setCategory(null)}>
+                Search all icons
+              </button>
             </>
           ) : (
             // Nothing found: offer to request it, with the search carried over to /manage.
@@ -201,6 +278,8 @@ export function IconGallery({ icons }: { icons: Item[] }) {
           })}
         </ul>
       )}
+      </div>
+      </div>
 
       {openIndex >= 0 && (
         <IconModal
