@@ -101,8 +101,8 @@ export default async function Home() {
             with personality.
           </h1>
           <p className="max-w-xl text-lg text-muted">
-            Add one tiny script and drop icons straight into your HTML. Pick a style, pick a colour, or just grab the
-            SVG.
+            Free to use, forever. Add one tiny script and drop icons straight into your HTML. Pick a style, pick a
+            colour, or just grab the SVG.
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-4">
             <Link href="/icons" className="btn-fun btn-fun-primary">

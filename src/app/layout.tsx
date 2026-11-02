@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Londrina_Solid } from "next/font/google";
 import "./globals.css";
 import { ThemeSync } from "@/components/ThemeSync";
 import { MobileMenu } from "@/components/MobileMenu";
+import { PixelFade } from "@/components/PixelFade";
 import { THEME_SCRIPT } from "@/lib/palette";
 import { canEdit } from "@/lib/editing";
 import { STYLES } from "@/lib/svg";
@@ -105,6 +106,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+        <PixelFade />
         {/* Inverted: the main colour as background. */}
         <footer className="bg-foreground text-on-foreground">
           <div className="mx-auto flex h-16 max-w-6xl items-center justify-center px-4 text-sm sm:px-6">
