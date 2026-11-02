@@ -37,7 +37,7 @@ const FAMILIES = [
 /** Designs shown in the home page's shop section, one per product (in black, ready to order). */
 const SHOP: Record<(typeof PRODUCTS)[number]["slug"], string> = { tshirt: "poop-smile", mug: "campfire", sticker: "skull" };
 
-const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+const NUMBERS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen"];
 
 /** One showcase icon and a line of description per style. */
 const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boolean }> = {
@@ -54,6 +54,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   studs: { icon: "scout", text: "Studded bricks, like a famous toy construction set." },
   mosaic: { icon: "fountain", text: "Little square tiles, set with a groove like a mosaic." },
   halftone: { icon: "mug", text: "Print dots that grow and merge into a solid core.", fill: true },
+  grainy: { icon: "octopus", text: "Inked tiles with a worn grain, like a rubber stamp." },
 };
 
 export default async function Home() {

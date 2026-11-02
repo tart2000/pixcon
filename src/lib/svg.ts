@@ -2,6 +2,9 @@ import { GRID, type Grid } from "./pixels";
 
 export const STYLES = [
   { id: "pixel", label: "Pixel" },
+  { id: "mosaic", label: "Mosaic" },
+  { id: "studs", label: "Studs" },
+  { id: "quirky", label: "Quirky" },
   { id: "rounded", label: "Rounded" },
   { id: "blob", label: "Blob" },
   { id: "liquid", label: "Liquid" },
@@ -10,10 +13,8 @@ export const STYLES = [
   { id: "stitch", label: "Stitch" },
   { id: "knit", label: "Knit" },
   { id: "dots", label: "Dots" },
-  { id: "quirky", label: "Quirky" },
-  { id: "studs", label: "Studs" },
-  { id: "mosaic", label: "Mosaic" },
   { id: "halftone", label: "Halftone" },
+  { id: "grainy", label: "Grainy" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -555,6 +556,57 @@ function halftonePath(g: Grid): string {
   return d;
 }
 
+/** A fixed value in [0, 1) for a list of small integers: the same inputs always give the same value. */
+function hash(...n: number[]): number {
+  let h = 0x811c9dc5;
+  for (const v of n) h = Math.imul(h ^ v, 0x01000193);
+  h ^= h >>> 15;
+  h = Math.imul(h, 0x2c1b3c6d);
+  h ^= h >>> 12;
+  return (h >>> 0) / 4294967296;
+}
+
+/**
+ * Grainy style: square tiles set apart by a thin joint, each with up to 16 specks cut
+ * out like a worn stamp. Most specks hug the tile's open edges, a few are bigger, and
+ * they sit at fixed places for each pixel.
+ */
+function grainyPath(g: Grid): string {
+  const gap = 0.4;
+  const round = (v: number) => +v.toFixed(1);
+  let d = "";
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++) {
+      if (!on(g, x, y)) continue;
+      const x0 = x * U + gap;
+      const y0 = y * U + gap;
+      const x1 = (x + 1) * U - gap;
+      const y1 = (y + 1) * U - gap;
+      d += rect(x0, y0, x1 - x0, y1 - y0);
+      const open = [[0, -1], [1, 0], [0, 1], [-1, 0]].filter(([dx, dy]) => !on(g, x + dx, y + dy));
+      const placed: [number, number, number][] = [];
+      for (let i = 0; i < 16; i++) {
+        const h = (k: number) => hash(x, y, i, k);
+        const s = round(h(0) < 0.15 ? 1.1 + h(1) * 0.7 : 0.4 + h(1) * 0.5);
+        let px = x0 + 0.2 + h(2) * (x1 - x0 - 0.4 - s);
+        let py = y0 + 0.2 + h(3) * (y1 - y0 - 0.4 - s);
+        if (open.length && h(4) < 0.7) {
+          const [dx, dy] = open[Math.floor(h(5) * open.length)];
+          const inset = 0.2 + h(6) * 2.2;
+          if (dx) px = dx > 0 ? x1 - inset - s : x0 + inset;
+          if (dy) py = dy > 0 ? y1 - inset - s : y0 + inset;
+        }
+        px = round(px);
+        py = round(py);
+        // Overlapping cut-outs would cancel out and leave a filled square.
+        if (placed.some(([a, b, c]) => px < a + c + 0.1 && a < px + s + 0.1 && py < b + c + 0.1 && b < py + s + 0.1)) continue;
+        placed.push([px, py, s]);
+        d += `M${px} ${py}v${s}h${s}v${-s}Z`;
+      }
+    }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -583,6 +635,8 @@ export function iconPath(g: Grid, style: StyleId): string {
       return mosaicPath(g);
     case "halftone":
       return halftonePath(g);
+    case "grainy":
+      return grainyPath(g);
   }
 }
 
