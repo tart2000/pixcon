@@ -53,6 +53,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   quirky: { icon: "cat", text: "Slightly warped pixels, never quite square." },
   studs: { icon: "scout", text: "Studded bricks, like a famous toy construction set." },
   mosaic: { icon: "fountain", text: "Little square tiles, set with a groove like a mosaic." },
+  halftone: { icon: "mug", text: "Print dots that grow and merge into a solid core.", fill: true },
 };
 
 export default async function Home() {

@@ -13,6 +13,7 @@ export const STYLES = [
   { id: "quirky", label: "Quirky" },
   { id: "studs", label: "Studs" },
   { id: "mosaic", label: "Mosaic" },
+  { id: "halftone", label: "Halftone" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -510,6 +511,50 @@ function mosaicPath(g: Grid): string {
   return d;
 }
 
+/** Steps from each filled pixel to the nearest empty one (4-connected, off the grid counts as empty); 0 when empty. */
+function depth(g: Grid): number[] {
+  const dist = Array<number>(GRID * GRID).fill(0);
+  const around = (x: number, y: number) => [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]];
+  let ring: number[] = [];
+  for (let i = 0; i < GRID * GRID; i++) {
+    const x = i % GRID;
+    const y = Math.floor(i / GRID);
+    if (g[i] && around(x, y).some(([a, b]) => !on(g, a, b))) {
+      dist[i] = 1;
+      ring.push(i);
+    }
+  }
+  while (ring.length) {
+    const next: number[] = [];
+    for (const i of ring)
+      for (const [a, b] of around(i % GRID, Math.floor(i / GRID))) {
+        const n = b * GRID + a;
+        if (on(g, a, b) && !dist[n]) {
+          dist[n] = dist[i] + 1;
+          next.push(n);
+        }
+      }
+    ring = next;
+  }
+  return dist;
+}
+
+/**
+ * Halftone style: a dot per pixel, bigger the deeper it sits in the shape, so thick
+ * areas melt into a solid core. Best with the fill variant: thin lines are all edge.
+ */
+function halftonePath(g: Grid): string {
+  const radii = [3.8, 5, 6.4];
+  const dist = depth(g);
+  let d = "";
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++) {
+      const k = dist[y * GRID + x];
+      if (k) d += circle(x * U + U / 2, y * U + U / 2, radii[Math.min(k, radii.length) - 1], true);
+    }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -536,6 +581,8 @@ export function iconPath(g: Grid, style: StyleId): string {
       return studsPath(g);
     case "mosaic":
       return mosaicPath(g);
+    case "halftone":
+      return halftonePath(g);
   }
 }
 
