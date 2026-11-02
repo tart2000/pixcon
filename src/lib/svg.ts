@@ -15,6 +15,7 @@ export const STYLES = [
   { id: "dots", label: "Dots" },
   { id: "halftone", label: "Halftone" },
   { id: "grainy", label: "Grainy" },
+  { id: "patchwork", label: "Patchwork" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -607,6 +608,34 @@ function grainyPath(g: Grid): string {
   return d;
 }
 
+/**
+ * Patchwork style: the grid is cut into 2×2 zones, and each zone gets a fixed texture —
+ * solid or a 2×2 checker — from its position. The checkers are in phase across
+ * the whole grid, so neighbouring pixels with the same texture tile seamlessly.
+ */
+function patchworkPath(g: Grid): string {
+  const textures = [0, 2, 0, 2, 2, 0, 2, 0]; // checker size per pixel, 0 for solid
+  const zone = (x: number, y: number) => {
+    let h = Math.imul(x * 374761393 + y * 668265263, 1274126177);
+    h = Math.imul(h ^ (h >>> 13), 1103515245);
+    return textures[Math.floor((((h ^ (h >>> 16)) >>> 0) / 4294967296) * textures.length)];
+  };
+  let d = "";
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++) {
+      if (!on(g, x, y)) continue;
+      const n = zone(x >> 1, y >> 1);
+      if (!n) {
+        d += rect(x * U, y * U, U, U);
+        continue;
+      }
+      const s = U / n;
+      for (let j = 0; j < n; j++)
+        for (let i = 0; i < n; i++) if ((x * n + i + y * n + j) % 2 === 0) d += rect(x * U + i * s, y * U + j * s, s, s);
+    }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -637,6 +666,8 @@ export function iconPath(g: Grid, style: StyleId): string {
       return halftonePath(g);
     case "grainy":
       return grainyPath(g);
+    case "patchwork":
+      return patchworkPath(g);
   }
 }
 

@@ -55,6 +55,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   mosaic: { icon: "fountain", text: "Little square tiles, set with a groove like a mosaic." },
   halftone: { icon: "mug", text: "Print dots that grow and merge into a solid core.", fill: true },
   grainy: { icon: "octopus", text: "Inked tiles with a worn grain, like a rubber stamp." },
+  patchwork: { icon: "skull", text: "Solid and checkered patches, stitched across the grid.", fill: true },
 };
 
 export default async function Home() {
