@@ -10,6 +10,8 @@ export const STYLES = [
   { id: "stitch", label: "Stitch" },
   { id: "knit", label: "Knit" },
   { id: "dots", label: "Dots" },
+  { id: "quirky", label: "Quirky" },
+  { id: "studs", label: "Studs" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -354,6 +356,134 @@ function dotsPath(g: Grid): string {
   return d;
 }
 
+/**
+ * Fixed nudge for each vertex of the grid, in [-1, 1] on both axes: a hash of its
+ * position, so every icon bends the same way at the same place, on every render.
+ */
+function nudge(x: number, y: number): [number, number] {
+  const unit = (seed: number) => {
+    let h = Math.imul(x * 374761393 + y * 668265263 + seed, 1274126177);
+    h = Math.imul(h ^ (h >>> 13), 1103515245);
+    return (((h ^ (h >>> 16)) >>> 0) / 4294967295) * 2 - 1;
+  };
+  return [unit(0x9e37), unit(0x7f4a)];
+}
+
+/**
+ * Quirky style: trace the outline of each region on the grid, keep only its corners,
+ * and move each corner by its vertex's nudge. Straight edges stay straight, and
+ * shapes that share a corner still meet there. `amp` is in viewBox units, so the
+ * default moves corners by up to 15% of a pixel at any size.
+ */
+function quirkyPath(g: Grid, amp = 1.5): string {
+  // Outline edges, clockwise around the filled cells, keyed by their start vertex.
+  const V = GRID + 1;
+  const out = new Map<number, number[]>();
+  const add = (x0: number, y0: number, x1: number, y1: number) => {
+    const from = y0 * V + x0;
+    out.set(from, [...(out.get(from) ?? []), y1 * V + x1]);
+  };
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++) {
+      if (!on(g, x, y)) continue;
+      if (!on(g, x, y - 1)) add(x, y, x + 1, y);
+      if (!on(g, x + 1, y)) add(x + 1, y, x + 1, y + 1);
+      if (!on(g, x, y + 1)) add(x + 1, y + 1, x, y + 1);
+      if (!on(g, x - 1, y)) add(x, y + 1, x, y);
+    }
+
+  const dir = (a: number, b: number): [number, number] => [(b % V) - (a % V), Math.floor(b / V) - Math.floor(a / V)];
+  const clamp = (v: number) => Math.min(SIZE, Math.max(0, v));
+  let d = "";
+  for (const start of out.keys()) {
+    while (out.get(start)?.length) {
+      // Walk one loop. Where two diagonal pixels meet, turn right so they stay separate shapes.
+      const loop = [start];
+      let prev = start;
+      let at = out.get(start)!.shift()!;
+      while (at !== start) {
+        const next = out.get(at)!;
+        const [px, py] = dir(prev, at);
+        const pick = next.length > 1 ? Math.max(0, next.findIndex((n) => {
+          const [nx, ny] = dir(at, n);
+          return nx === -py && ny === px;
+        })) : 0;
+        loop.push(at);
+        prev = at;
+        at = next.splice(pick, 1)[0];
+      }
+      // Keep the corners only, then nudge them.
+      const corners = loop.filter((v, i) => {
+        const [ax, ay] = dir(loop[(i + loop.length - 1) % loop.length], v);
+        const [bx, by] = dir(v, loop[(i + 1) % loop.length]);
+        return ax !== bx || ay !== by;
+      });
+      d += corners
+        .map((v, i) => {
+          const x = v % V;
+          const y = Math.floor(v / V);
+          const [nx, ny] = nudge(x, y);
+          const px = clamp(x * U + nx * amp);
+          const py = clamp(y * U + ny * amp);
+          return `${i ? "L" : "M"}${+px.toFixed(2)} ${+py.toFixed(2)}`;
+        })
+        .join("") + "Z";
+    }
+  }
+  return d;
+}
+
+/** A full circle as two arcs; `cw` picks its winding, so it can fill or cut out. */
+const circle = (cx: number, cy: number, r: number, cw: boolean) =>
+  `M${cx - r} ${cy}a${r} ${r} 0 1 ${+cw} ${2 * r} 0a${r} ${r} 0 1 ${+cw} ${-2 * r} 0Z`;
+
+/** Brick lengths for a run of `n` pixels starting at (x, y): 2 to 4 long, the same split every time. */
+function brickLengths(n: number, x: number, y: number): number[] {
+  const lengths: number[] = [];
+  while (n > 4) {
+    let len = 2 + (Math.imul(x * 73856093 ^ y * 19349663, 2654435761) >>> 0) % 3;
+    if (n - len === 1) len--;
+    lengths.push(len);
+    n -= len;
+    x += len;
+  }
+  return [...lengths, n];
+}
+
+/**
+ * Studs style: each row of pixels is laid in bricks 2 to 4 long, with a stud on every
+ * pixel, set apart by a cut-out ring that widens to the bottom right like a shadow.
+ */
+function studsPath(g: Grid): string {
+  const gap = 0.25;
+  const stud = 2.8;
+  const ring = 3.6;
+  const shadow = 0.7;
+  let d = "";
+  for (let y = 0; y < GRID; y++) {
+    let x = 0;
+    while (x < GRID) {
+      if (!on(g, x, y)) {
+        x++;
+        continue;
+      }
+      const start = x;
+      while (on(g, x, y)) x++;
+      let bx = start;
+      for (const len of brickLengths(x - start, start, y)) {
+        d += rect(bx * U + gap, y * U + gap, len * U - 2 * gap, U - 2 * gap);
+        for (let i = bx; i < bx + len; i++) {
+          const cx = i * U + U / 2;
+          const cy = y * U + U / 2;
+          d += circle(cx + shadow, cy + shadow, ring, false) + circle(cx, cy, stud, true);
+        }
+        bx += len;
+      }
+    }
+  }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -374,6 +504,10 @@ export function iconPath(g: Grid, style: StyleId): string {
       return knitPath(g);
     case "dots":
       return dotsPath(g);
+    case "quirky":
+      return quirkyPath(g);
+    case "studs":
+      return studsPath(g);
   }
 }
 
