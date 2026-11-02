@@ -12,6 +12,7 @@ export const STYLES = [
   { id: "dots", label: "Dots" },
   { id: "quirky", label: "Quirky" },
   { id: "studs", label: "Studs" },
+  { id: "mosaic", label: "Mosaic" },
 ] as const;
 
 export type StyleId = (typeof STYLES)[number]["id"];
@@ -484,6 +485,31 @@ function studsPath(g: Grid): string {
   return d;
 }
 
+const poly = (pts: [number, number][]) =>
+  pts.map(([x, y], i) => `${i ? "L" : "M"}${+x.toFixed(2)} ${+y.toFixed(2)}`).join("") + "Z";
+
+/** Mosaic style: each pixel a square tile, with an L-shaped groove along its bottom and right edges. */
+function mosaicPath(g: Grid): string {
+  const gap = 0.3;
+  const inset = 1.6;
+  const t = 1.1;
+  let d = "";
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++) {
+      if (!on(g, x, y)) continue;
+      const x0 = x * U + gap;
+      const y0 = y * U + gap;
+      const x1 = (x + 1) * U - gap;
+      const y1 = (y + 1) * U - gap;
+      d += rect(x0, y0, x1 - x0, y1 - y0);
+      const r = x1 - inset;
+      const b = y1 - inset;
+      // Counter-clockwise, so it cuts out of the tile.
+      d += poly([[r - t, b - t], [x0 + inset, b - t], [x0 + inset, b], [r, b], [r, y0 + inset], [r - t, y0 + inset]]);
+    }
+  return d;
+}
+
 export function iconPath(g: Grid, style: StyleId): string {
   switch (style) {
     case "pixel":
@@ -508,6 +534,8 @@ export function iconPath(g: Grid, style: StyleId): string {
       return quirkyPath(g);
     case "studs":
       return studsPath(g);
+    case "mosaic":
+      return mosaicPath(g);
   }
 }
 

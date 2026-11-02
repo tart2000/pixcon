@@ -52,6 +52,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   dots: { icon: "gamepad", text: "Four round dots per pixel, like an LED board." },
   quirky: { icon: "cat", text: "Slightly warped pixels, never quite square." },
   studs: { icon: "scout", text: "Studded bricks, like a famous toy construction set." },
+  mosaic: { icon: "fountain", text: "Little square tiles, set with a groove like a mosaic." },
 };
 
 export default async function Home() {
