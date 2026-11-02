@@ -12,6 +12,7 @@ import { recordDownload, recordView } from "@/app/actions";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
+import { GridToggle } from "./GridToggle";
 import { findInk } from "@/lib/merch/products";
 import { CheckIcon, ChevronIcon, CloseIcon, CopyIcon, DownloadIcon, LinkIcon, ShirtIcon } from "./UiIcons";
 
@@ -31,6 +32,8 @@ export function IconModal({
   setVariant,
   style,
   setStyle,
+  grid,
+  setGrid,
 }: {
   icons: Item[];
   index: number;
@@ -42,6 +45,8 @@ export function IconModal({
   setVariant: (v: Variant) => void;
   style: StyleId;
   setStyle: (s: StyleId) => void;
+  grid: boolean;
+  setGrid: (g: boolean) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [copied, setCopied] = useState<"name" | "link" | "code" | null>(null);
@@ -49,8 +54,9 @@ export function IconModal({
   const color = useIconColor();
   const icon = icons[index];
   const pixels = variant === "fill" ? (icon.fill ?? icon.pixels) : icon.pixels;
-  const svg = iconSvg(decode(pixels), style, { color: color ?? undefined });
-  const code = format === "html" ? kitTag(icon.name, style, variant) : svg;
+  const svg = iconSvg(decode(pixels), style, { color: color ?? undefined, grid });
+  const tag = kitTag(icon.name, style, variant, grid);
+  const code = format === "html" ? tag : svg;
 
   useEffect(() => {
     const d = ref.current;
@@ -66,12 +72,12 @@ export function IconModal({
   }, [icon.id]);
 
   const download = (ext: "svg" | "png", content: string | Blob) => {
-    downloadFile(`${slugify(icon.name)}-${variant}-${style}.${ext}`, content);
+    downloadFile(`${slugify(icon.name)}-${variant}-${style}${grid ? "-grid" : ""}.${ext}`, content);
     recordDownload(icon.id).catch(() => {});
   };
 
   // The PNG has no surrounding text to inherit a colour from: black unless one is picked.
-  const pngSvg = iconSvg(decode(pixels), style, { size: PNG_SIZE, color: color ?? "#000" });
+  const pngSvg = iconSvg(decode(pixels), style, { size: PNG_SIZE, color: color ?? "#000", grid });
   const [png, setPng] = useState<{ svg: string; blob: Blob; url: string } | null>(null);
   useEffect(() => {
     if (format !== "png") return;
@@ -156,22 +162,24 @@ export function IconModal({
         <div className="grid gap-6 md:grid-cols-[1fr_1.1fr]">
           <div className="flex flex-col rounded-lg border border-border">
             <div className="flex flex-1 items-center justify-center py-10">
-              {/* Hovering the icon reveals the 11×11 grid it's drawn on, faintly, behind it. */}
+              {/* Hovering the icon reveals the 11×11 grid it's drawn on, faintly, behind it, unless the grid is shown already. */}
               <div className="group relative">
-                <svg
-                  viewBox={VIEWBOX}
-                  className="pointer-events-none absolute inset-0 size-full opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  aria-hidden
-                >
-                  <rect x="0" y="0" width="110" height="110" className="fill-none stroke-border" strokeWidth={0.6} />
-                  <path d={GRID_LINES} className="fill-none stroke-border" strokeWidth={0.6} />
-                </svg>
-                <IconGlyph pixels={pixels} style={style} size={176} color={color} className="relative" />
+                {!grid && (
+                  <svg
+                    viewBox={VIEWBOX}
+                    className="pointer-events-none absolute inset-0 size-full opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    aria-hidden
+                  >
+                    <rect x="0" y="0" width="110" height="110" className="fill-none stroke-border" strokeWidth={0.6} />
+                    <path d={GRID_LINES} className="fill-none stroke-border" strokeWidth={0.6} />
+                  </svg>
+                )}
+                <IconGlyph pixels={pixels} style={style} size={176} color={color} grid={grid} className="relative" />
               </div>
             </div>
             <div className="flex items-end justify-center gap-5 border-t border-border py-4">
               {[16, 24, 32, 48].map((size) => (
-                <IconGlyph key={size} pixels={pixels} style={style} size={size} color={color} />
+                <IconGlyph key={size} pixels={pixels} style={style} size={size} color={color} grid={grid} />
               ))}
             </div>
           </div>
@@ -180,6 +188,7 @@ export function IconModal({
             <div className="flex flex-wrap items-center gap-2">
               <StyleSelect value={style} onChange={setStyle} />
               <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
+              <GridToggle value={grid} onChange={setGrid} />
               <ColorPicker />
             </div>
             {/* Code: folder tabs on a panel holding the snippet (or PNG) and its actions. */}
@@ -222,7 +231,7 @@ export function IconModal({
                     {format === "html" ? (
                       <>
                         <span className="text-on-foreground/60">&lt;i class=&quot;</span>
-                        <span className="font-semibold">{kitTag(icon.name, style, variant).match(/class="([^"]*)"/)![1]}</span>
+                        <span className="font-semibold">{tag.match(/class="([^"]*)"/)![1]}</span>
                         <span className="text-on-foreground/60">&quot;&gt;&lt;/i&gt;</span>
                       </>
                     ) : (

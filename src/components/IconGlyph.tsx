@@ -1,5 +1,5 @@
 import { decode, type Grid } from "@/lib/pixels";
-import { iconPath, VIEWBOX, type StyleId } from "@/lib/svg";
+import { GRID_OPACITY, gridPath, iconPath, VIEWBOX, type StyleId } from "@/lib/svg";
 
 export function IconGlyph({
   pixels,
@@ -7,6 +7,7 @@ export function IconGlyph({
   size = 24,
   className,
   color,
+  grid = false,
 }: {
   pixels: string | Grid;
   style: StyleId;
@@ -14,11 +15,14 @@ export function IconGlyph({
   className?: string;
   /** Defaults to the surrounding text colour. */
   color?: string | null;
+  /** Show the style's grid behind the icon. */
+  grid?: boolean;
 }) {
-  const grid = typeof pixels === "string" ? decode(pixels) : pixels;
+  const cells = typeof pixels === "string" ? decode(pixels) : pixels;
   return (
     <svg width={size} height={size} viewBox={VIEWBOX} fill={color ?? "currentColor"} className={className} aria-hidden>
-      <path d={iconPath(grid, style)} />
+      {grid && <path d={gridPath(style)} opacity={GRID_OPACITY} />}
+      <path d={iconPath(cells, style)} />
     </svg>
   );
 }

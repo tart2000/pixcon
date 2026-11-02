@@ -5,7 +5,8 @@
  */
 import { VARIANTS, fromHex, type Variant } from "@/lib/pixels";
 import { RESERVED_NAMES } from "@/lib/reserved";
-import { STYLES, VIEWBOX, iconPath, type StyleId } from "@/lib/svg";
+import { GRID_OPACITY, STYLES, VIEWBOX, gridPath, iconPath, type StyleId } from "@/lib/svg";
+import { GRID_CLASS } from "@/lib/kit";
 
 /** name → [regular, fill | null], grids as hex. */
 declare const __PIXCON_ICONS__: Record<string, [string, string | null]>;
@@ -21,6 +22,7 @@ const pick = <T extends string>(value: string | undefined, ids: Set<string>, fal
   (value && ids.has(value) ? value : fallback) as T;
 const defaultStyle = pick<StyleId>(script?.dataset.style, STYLE_IDS, "pixel");
 const defaultVariant = pick<Variant>(script?.dataset.variant, VARIANT_IDS, "regular");
+const defaultGrid = script?.dataset.grid === "true";
 
 const paths = new Map<string, string>();
 const warned = new Set<string>();
@@ -40,14 +42,16 @@ function render(el: HTMLElement) {
   let name = "";
   let style = defaultStyle;
   let variant = defaultVariant;
+  let grid = defaultGrid;
   for (const c of el.classList) {
     if (!c.startsWith("px-")) continue;
     const v = c.slice(3);
-    if (STYLE_IDS.has(v)) style = v as StyleId;
+    if (v === GRID_CLASS) grid = true;
+    else if (STYLE_IDS.has(v)) style = v as StyleId;
     else if (VARIANT_IDS.has(v)) variant = v as Variant;
     else if (!RESERVED.has(v)) name = v;
   }
-  const key = `${name}/${style}/${variant}`;
+  const key = `${name}/${style}/${variant}/${grid}`;
   if (el.dataset.pxRendered === key) return;
   el.dataset.pxRendered = key;
 
@@ -60,7 +64,8 @@ function render(el: HTMLElement) {
     el.replaceChildren();
     return;
   }
-  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEWBOX}" fill="currentColor" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+  const behind = grid ? `<path d="${gridPath(style)}" opacity="${GRID_OPACITY}"/>` : "";
+  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEWBOX}" fill="currentColor" aria-hidden="true" focusable="false">${behind}<path d="${d}"/></svg>`;
 }
 
 function scan(root: ParentNode | Element) {

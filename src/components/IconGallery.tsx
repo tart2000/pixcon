@@ -10,6 +10,7 @@ import { useIconColor } from "@/lib/iconColor";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
 import { Segmented } from "./Segmented";
+import { GridToggle } from "./GridToggle";
 import { matchesQuery } from "@/lib/alts";
 import { CATEGORIES, categoryPath, inCategory } from "@/lib/categories";
 import { canEdit } from "@/lib/editing";
@@ -22,6 +23,7 @@ type Item = { id: number; name: string; alts: string[]; pixels: string; fill: st
 export function IconGallery({ icons }: { icons: Item[] }) {
   const [style, setStyle] = useState<StyleId>("liquid-blob");
   const [variant, setVariant] = useState<Variant>("regular");
+  const [grid, setGrid] = useState(false);
   const [size, setSize] = useState(68);
   const [copied, setCopied] = useState<number | null>(null);
   const color = useIconColor();
@@ -82,7 +84,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
 
   /** Pixels of the selected variant, or null when this icon has no fill yet. */
   const pixelsOf = (i: Item) => (variant === "fill" ? i.fill : i.pixels);
-  const svgFor = (i: Item) => iconSvg(decode(pixelsOf(i)!), style, { color: color ?? undefined });
+  const svgFor = (i: Item) => iconSvg(decode(pixelsOf(i)!), style, { color: color ?? undefined, grid });
 
   const copy = async (i: Item) => {
     await navigator.clipboard.writeText(svgFor(i));
@@ -122,6 +124,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
         <div className="flex flex-wrap items-center gap-2">
           <StyleSelect value={style} onChange={setStyle} />
           <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
+          <GridToggle value={grid} onChange={setGrid} />
           <ColorPicker align="left" />
           {/* One button to the eye, but two to click: the frame holds the toggle and its X. */}
           <div className={`btn gap-0 p-0 ${showCategories || category ? "border-foreground" : ""}`}>
@@ -252,6 +255,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
                     style={style}
                     size={size}
                     color={color}
+                    grid={grid}
                     className={missing ? "opacity-15" : undefined}
                   />
                   <span className="w-full truncate text-center font-mono text-xs text-muted">{i.name}</span>
@@ -265,7 +269,7 @@ export function IconGallery({ icons }: { icons: Item[] }) {
                       className="btn-icon size-7"
                       title="Download SVG"
                       onClick={() => {
-                        downloadFile(`${slugify(i.name)}-${variant}-${style}.svg`, svgFor(i));
+                        downloadFile(`${slugify(i.name)}-${variant}-${style}${grid ? "-grid" : ""}.svg`, svgFor(i));
                         recordDownload(i.id).catch(() => {});
                       }}
                     >
@@ -292,6 +296,8 @@ export function IconGallery({ icons }: { icons: Item[] }) {
           setVariant={setVariant}
           style={style}
           setStyle={setStyle}
+          grid={grid}
+          setGrid={setGrid}
         />
       )}
     </div>

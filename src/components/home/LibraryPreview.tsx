@@ -8,6 +8,7 @@ import { type StyleId } from "@/lib/svg";
 import { ColorPicker } from "../ColorPicker";
 import { IconGlyph } from "../IconGlyph";
 import { Segmented } from "../Segmented";
+import { GridToggle } from "../GridToggle";
 
 type Item = { name: string; pixels: string; fill: string | null };
 
@@ -15,12 +16,14 @@ type Item = { name: string; pixels: string; fill: string | null };
 export function LibraryPreview({ icons, total }: { icons: Item[]; total: number }) {
   const [style, setStyle] = useState<StyleId>("liquid-blob");
   const [variant, setVariant] = useState<Variant>("regular");
+  const [grid, setGrid] = useState(false);
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-background p-4 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
         <StyleSelect value={style} onChange={setStyle} />
         <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
+        <GridToggle value={grid} onChange={setGrid} />
         {/* The picked colour themes the whole site, these icons included. */}
         <div className="sm:ml-auto">
           <ColorPicker />
@@ -34,7 +37,7 @@ export function LibraryPreview({ icons, total }: { icons: Item[]; total: number 
               title={i.name}
               className="flex aspect-square items-center justify-center transition-colors hover:bg-subtle"
             >
-              <IconGlyph pixels={(variant === "fill" && i.fill) || i.pixels} style={style} size={36} />
+              <IconGlyph pixels={(variant === "fill" && i.fill) || i.pixels} style={style} size={36} grid={grid} />
             </Link>
           </li>
         ))}

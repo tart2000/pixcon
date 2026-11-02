@@ -1,5 +1,6 @@
 import { VARIANTS } from "./pixels";
 import { STYLES } from "./svg";
+import { GRID_CLASS } from "./kit";
 
 /** Kit modifiers kept free for later (sizes, animation…). */
 const MODIFIERS = ["xs", "sm", "lg", "xl", "2x", "3x", "spin", "fw"];
@@ -11,6 +12,7 @@ const MODIFIERS = ["xs", "sm", "lg", "xl", "2x", "3x", "spin", "fw"];
 const RESERVED = new Map<string, string>([
   ...STYLES.map((s) => [s.id, "style name"] as const),
   ...VARIANTS.map((v) => [v.id, "variant name"] as const),
+  [GRID_CLASS, "kit modifier"],
   ...MODIFIERS.map((m) => [m, "kit modifier"] as const),
 ]);
 

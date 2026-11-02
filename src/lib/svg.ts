@@ -285,11 +285,14 @@ function retroPath(g: Grid): string {
  * `cap` wide on each side, all wound the same way so overlaps merge under the nonzero rule.
  * The drawing is shrunk by `cap` on each side so caps on the grid's edge stay in the viewBox.
  */
+/** Where a point of a needlework drawing lands once shrunk to keep its `cap` in view. */
+const shrunk = (cap: number) => (v: number) => cap + (v * (SIZE - 2 * cap)) / SIZE;
+
 function roundStrokes(segments: [number, number, number, number][], cap: number): string {
   const k = (SIZE - 2 * cap) / SIZE;
   const r = cap * k;
   const n = (v: number) => +v.toFixed(3);
-  const at = (v: number) => cap + v * k;
+  const at = shrunk(cap);
   return segments
     .map(([ax, ay, bx, by]) => {
       [ax, ay, bx, by] = [at(ax), at(ay), at(bx), at(by)];
@@ -492,11 +495,12 @@ const poly = (pts: [number, number][]) =>
   pts.map(([x, y], i) => `${i ? "L" : "M"}${+x.toFixed(2)} ${+y.toFixed(2)}`).join("") + "Z";
 
 /** Mosaic style: each pixel a square tile, with an L-shaped groove along its bottom and right edges. */
-function mosaicPath(g: Grid): string {
+/** Mosaic style; `negative` draws what lies around the tiles instead: the joints and the grooves. */
+function mosaicPath(g: Grid, negative = false): string {
   const gap = 0.3;
   const inset = 1.6;
   const t = 1.1;
-  let d = "";
+  let d = negative ? rect(0, 0, SIZE, SIZE) : "";
   for (let y = 0; y < GRID; y++)
     for (let x = 0; x < GRID; x++) {
       if (!on(g, x, y)) continue;
@@ -504,11 +508,14 @@ function mosaicPath(g: Grid): string {
       const y0 = y * U + gap;
       const x1 = (x + 1) * U - gap;
       const y1 = (y + 1) * U - gap;
-      d += rect(x0, y0, x1 - x0, y1 - y0);
       const r = x1 - inset;
       const b = y1 - inset;
       // Counter-clockwise, so it cuts out of the tile.
-      d += poly([[r - t, b - t], [x0 + inset, b - t], [x0 + inset, b], [r, b], [r, y0 + inset], [r - t, y0 + inset]]);
+      const groove: [number, number][] = [[r - t, b - t], [x0 + inset, b - t], [x0 + inset, b], [r, b], [r, y0 + inset], [r - t, y0 + inset]];
+      // In the negative, the tile is the hole and the groove is filled: both wound the other way.
+      d += negative
+        ? `M${x0} ${y0}V${y1}H${x1}V${y0}Z` + poly(groove.reverse())
+        : rect(x0, y0, x1 - x0, y1 - y0) + poly(groove);
     }
   return d;
 }
@@ -671,9 +678,120 @@ export function iconPath(g: Grid, style: StyleId): string {
   }
 }
 
-export function iconSvg(g: Grid, style: StyleId, opts: { size?: number; color?: string } = {}): string {
-  const { size = 24, color = "currentColor" } = opts;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${SIZE} ${SIZE}" fill="${color}"><path d="${iconPath(g, style)}"/></svg>`;
+// ---- The grid behind an icon (px-gridded) ----
+
+/** How strongly the grid shows, in the icon's own colour. */
+export const GRID_OPACITY = 0.25;
+
+/** Every vertex (0–11 on both axes) or every cell centre, as points in units. */
+const VERTICES = Array.from({ length: (GRID + 1) ** 2 }, (_, i) => [(i % (GRID + 1)) * U, Math.floor(i / (GRID + 1)) * U]);
+const CENTRES = Array.from({ length: GRID * GRID }, (_, i) => [(i % GRID) * U + U / 2, Math.floor(i / GRID) * U + U / 2]);
+const dotsAt = (points: number[][], r: number) => points.map(([x, y]) => circle(x, y, r, true)).join("");
+
+/** Thin lines along the cell edges, the outer ones kept inside the canvas. */
+function gridLines(w: number, { across = true, down = true } = {}): string {
+  const at = (i: number) => Math.min(Math.max(i * U - w / 2, 0), SIZE - w);
+  let d = "";
+  for (let i = 0; i <= GRID; i++) {
+    if (down) d += rect(at(i), 0, w, SIZE);
+    if (across) d += rect(0, at(i), SIZE, w);
+  }
+  return d;
+}
+
+/** Quirky's grid: every cell edge runs between the same nudged vertices as the icon. */
+function quirkyGrid(w: number, amp = 1.5): string {
+  const pt = (x: number, y: number) => {
+    const [nx, ny] = nudge(x, y);
+    return [Math.min(SIZE, Math.max(0, x * U + nx * amp)), Math.min(SIZE, Math.max(0, y * U + ny * amp))];
+  };
+  const edge = ([ax, ay]: number[], [bx, by]: number[]) => {
+    // A thin quad along a→b, w wide.
+    const len = Math.hypot(bx - ax, by - ay);
+    const [ox, oy] = [(-(by - ay) / len) * (w / 2), ((bx - ax) / len) * (w / 2)];
+    return poly([[ax + ox, ay + oy], [bx + ox, by + oy], [bx - ox, by - oy], [ax - ox, ay - oy]]);
+  };
+  let d = "";
+  for (let y = 0; y <= GRID; y++)
+    for (let x = 0; x <= GRID; x++) {
+      if (x < GRID) d += edge(pt(x, y), pt(x + 1, y));
+      if (y < GRID) d += edge(pt(x, y), pt(x, y + 1));
+    }
+  return d;
+}
+
+/**
+ * Knit's grid: the same knitting over the whole canvas, as a thin line through the middle
+ * of the stitches. Every half-pixel row of chevrons is one zigzag, drawn as the band
+ * between it moved up and down (slopes are ±1, so that keeps the line `w` thick).
+ */
+function knitGrid(w: number): string {
+  const at = shrunk(U / 6);
+  const half = (w / 2) * Math.SQRT2;
+  let d = "";
+  for (let j = 0; j < 2 * GRID; j++) {
+    // Valleys on the cell edges, peaks half a pixel up in the middle of the cells.
+    const pts = Array.from({ length: 2 * GRID + 1 }, (_, i) => [at((i * U) / 2), at((j * U) / 2 + (i % 2 ? 0 : U / 2))]);
+    d += poly([...pts.map(([x, y]) => [x, y - half]), ...pts.map(([x, y]) => [x, y + half]).reverse()] as [number, number][]);
+  }
+  return d;
+}
+
+/** Each style's grid, drawn in its own spirit: lines, dots, empty studs… */
+const GRID_PATHS = new Map<StyleId, string>();
+export function gridPath(style: StyleId): string {
+  const cached = GRID_PATHS.get(style);
+  if (cached !== undefined) return cached;
+  let d: string;
+  switch (style) {
+    case "quirky":
+      d = quirkyGrid(0.6);
+      break;
+    case "halftone":
+    case "liquid":
+    case "liquid-blob":
+      d = dotsAt(CENTRES, 1.3);
+      break;
+    case "dots":
+      // Small dots where the icon puts its own, four per cell.
+      d = dotsAt(CENTRES.flatMap(([x, y]) => [[x - U / 4, y - U / 4], [x + U / 4, y - U / 4], [x - U / 4, y + U / 4], [x + U / 4, y + U / 4]]), 0.8);
+      break;
+    case "mosaic":
+      // The joints and grooves of a fully tiled grid: empty tiles, outlined.
+      d = mosaicPath(Array(GRID * GRID).fill(true), true);
+      break;
+    case "stitch": {
+      // Holes of an embroidery canvas, where the crosses end: the cell corners, shrunk like the stitches.
+      const at = shrunk(U / 5);
+      d = dotsAt(VERTICES.map(([x, y]) => [at(x), at(y)]), 1.2);
+      break;
+    }
+    case "knit":
+      d = knitGrid(0.6);
+      break;
+    case "blob":
+      // An empty bubble in each cell.
+      d = CENTRES.map(([x, y]) => circle(x, y, U / 2 - 0.5, true) + circle(x, y, U / 2 - 1.4, false)).join("");
+      break;
+    case "studs":
+      // A baseplate: an empty stud on every cell.
+      d = CENTRES.map(([x, y]) => circle(x, y, 3.6, true) + circle(x, y, 2.8, false)).join("");
+      break;
+    case "retro":
+      // A thin line through the middle of each of the two scanlines a row holds.
+      d = Array.from({ length: GRID * 2 }, (_, i) => rect(0, Math.floor(i / 2) * U + (i % 2 ? U : U / 2) - U / 6 - 0.3, SIZE, 0.6)).join("");
+      break;
+    default:
+      d = gridLines(0.6);
+  }
+  GRID_PATHS.set(style, d);
+  return d;
+}
+
+export function iconSvg(g: Grid, style: StyleId, opts: { size?: number; color?: string; grid?: boolean } = {}): string {
+  const { size = 24, color = "currentColor", grid = false } = opts;
+  const behind = grid ? `<path d="${gridPath(style)}" opacity="${GRID_OPACITY}"/>` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${SIZE} ${SIZE}" fill="${color}">${behind}<path d="${iconPath(g, style)}"/></svg>`;
 }
 
 export const VIEWBOX = `0 0 ${SIZE} ${SIZE}`;

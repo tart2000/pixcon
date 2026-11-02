@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Script from "next/script";
 import { CodeBlock } from "@/components/CodeBlock";
-import { KIT_SCRIPT, KIT_URL } from "@/lib/kit";
+import { GRID_CLASS, KIT_SCRIPT, KIT_URL } from "@/lib/kit";
 import { kitSizeKB } from "@/lib/kitSize";
 import { pageMeta } from "@/lib/meta";
 import { VARIANTS } from "@/lib/pixels";
@@ -109,6 +109,18 @@ export default function GettingStartedPage() {
           <code className="font-mono text-foreground">px-regular</code>, or set your own defaults for the whole page:
         </p>
         <CodeBlock code={`<script src="${KIT_URL}" data-style="blob" data-variant="fill"></script>`} />
+        <p className="text-muted">
+          Add <code className="font-mono text-foreground">px-{GRID_CLASS}</code> to show the grid behind an icon, drawn
+          in the spirit of its style (lines, dots, empty studs…), or{" "}
+          <code className="font-mono text-foreground">data-grid=&quot;true&quot;</code> on the script for every icon.
+        </p>
+        {/* Big enough to see the grid, which is drawn faintly and finely. */}
+        <div className="grid grid-cols-2 justify-items-center gap-6 rounded-lg border border-border bg-background p-6 text-[112px] sm:grid-cols-4">
+          <i className={`px px-${DEMO} px-pixel px-regular px-${GRID_CLASS}`} />
+          <i className={`px px-${DEMO} px-halftone px-fill px-${GRID_CLASS}`} />
+          <i className={`px px-${DEMO} px-studs px-regular px-${GRID_CLASS}`} />
+          <i className={`px px-${DEMO} px-quirky px-regular px-${GRID_CLASS}`} />
+        </div>
       </Step>
 
       <Step n={4} title="Size and colour">
