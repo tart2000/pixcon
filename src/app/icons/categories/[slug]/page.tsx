@@ -4,8 +4,9 @@ import { CATEGORIES, categoryPath } from "@/lib/categories";
 import { listGalleryIcons } from "@/lib/db";
 import { pageMeta } from "@/lib/meta";
 import { IconGallery } from "@/components/IconGallery";
+import { styleFrom } from "@/lib/svg";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = PageProps<"/icons/categories/[slug]">;
 
 const findCategory = async ({ params }: Props) => {
   const { slug } = await params;
@@ -23,6 +24,7 @@ export async function generateMetadata(props: Props) {
 }
 
 export default async function CategoryPage(props: Props) {
+  const { searchParams } = props;
   const category = await findCategory(props);
   if (!category) notFound();
   await connection();
@@ -30,7 +32,7 @@ export default async function CategoryPage(props: Props) {
   return (
     <>
       <h1 className="sr-only">{category.label} icons</h1>
-      <IconGallery icons={await listGalleryIcons()} />
+      <IconGallery icons={await listGalleryIcons()} initialStyle={styleFrom(await searchParams)} />
     </>
   );
 }

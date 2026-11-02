@@ -149,9 +149,11 @@ export default async function Home() {
             const { icon, text, fill } = STYLE_SHOWCASE[st.id];
             const i = byName.get(icon);
             return (
-              <div
+              <Link
                 key={st.id}
-                className="flex w-full items-center gap-5 rounded-xl border border-border bg-background p-5 sm:w-[calc((100%-2rem)/3)]"
+                href={`/icons?style=${st.id}`}
+                title={`Browse the icons in ${st.label}`}
+                className="flex w-full items-center gap-5 rounded-xl border border-border bg-background p-5 transition-colors hover:border-border-strong hover:bg-subtle sm:w-[calc((100%-2rem)/3)]"
               >
                 <div className="flex shrink-0 items-center justify-center rounded-lg bg-subtle p-4">
                   {i && <IconGlyph pixels={(fill && i.fill) || i.pixels} style={st.id} size={128} />}
@@ -161,7 +163,7 @@ export default async function Home() {
                   <code className="font-mono text-xs whitespace-nowrap text-muted">px-{st.id}</code>
                   <p className="mt-1 text-sm text-muted">{text}</p>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

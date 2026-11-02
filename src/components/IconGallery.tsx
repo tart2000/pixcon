@@ -20,8 +20,11 @@ import { CheckIcon, CloseIcon, CopyIcon, DownloadIcon } from "./UiIcons";
 
 type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
 
-export function IconGallery({ icons }: { icons: Item[] }) {
-  const [style, setStyle] = useState<StyleId>("liquid-blob");
+const DEFAULT_STYLE: StyleId = "liquid-blob";
+
+/** `initialStyle` comes from the link that opened the gallery (?style=). */
+export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialStyle?: StyleId }) {
+  const [style, pickStyle] = useState<StyleId>(initialStyle ?? DEFAULT_STYLE);
   const [variant, setVariant] = useState<Variant>("regular");
   const [grid, setGrid] = useState(false);
   const [size, setSize] = useState(68);
@@ -34,6 +37,11 @@ export function IconGallery({ icons }: { icons: Item[] }) {
   const query = params.get("q") ?? "";
   const openName = params.get("icon");
   const setQuery = (q: string) => setUrl("replace", urlWith({ q }));
+  // The style follows the URL too, so a link like /icons?style=studs stays true once you change it.
+  const setStyle = (s: StyleId) => {
+    pickStyle(s);
+    setUrl("replace", urlWith({ style: s === DEFAULT_STYLE ? null : s }));
+  };
   // The gallery stays full width until the categories are asked for (or a link opens one).
   // Moving between categories keeps this page mounted, so the style and the size stay as they were.
   const pathname = usePathname();
