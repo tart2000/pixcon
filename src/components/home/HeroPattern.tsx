@@ -1,11 +1,14 @@
 import { decode } from "@/lib/pixels";
-import { VIEWBOX, iconPath } from "@/lib/svg";
+import { iconPath } from "@/lib/svg";
 
 const COLS = 64;
 /** Enough rows for the tallest hero (phones); the hero's height is a whole number of rows (see .hero-rows). */
 const ROWS = 18;
 const PITCH = 44;
 const SIZE = 22;
+/** Margin around an icon, in its own units (110 wide), filling the cell: SIZE inside PITCH. */
+const PAD = ((PITCH / SIZE - 1) * 110) / 2;
+const CELL_VIEWBOX = `${-PAD} ${-PAD} ${110 + 2 * PAD} ${110 + 2 * PAD}`;
 /** Distinct glyphs drawn once as <symbol>s, then reused across the grid to keep the page light. */
 const GLYPHS = 72;
 /** No glyph repeats within this many cells, in any direction. */
@@ -50,6 +53,7 @@ function layout(glyphs: number) {
 /**
  * A wall of small pixel icons behind the hero, faded out in the middle so the text stays readable.
  * One SVG: each glyph is a <symbol>, each cell a <use>. Rows start at the top edge so none is cut there.
+ * Each icon grows and tilts under the pointer (see .hero-glyph).
  */
 export function HeroPattern({ icons }: { icons: { pixels: string; fill: string | null }[] }) {
   if (!icons.length) return null;
@@ -57,25 +61,28 @@ export function HeroPattern({ icons }: { icons: { pixels: string; fill: string |
   const cells = layout(glyphs.length);
 
   return (
-    <div aria-hidden className="hero-fade pointer-events-none absolute inset-0 overflow-hidden text-foreground">
+    <div aria-hidden className="hero-fade absolute inset-0 overflow-hidden text-foreground">
       <svg width={COLS * PITCH} height={ROWS * PITCH} className="absolute top-0 left-1/2 -translate-x-1/2" fill="currentColor">
         <defs>
           {glyphs.map((d, i) => (
-            <symbol key={i} id={`hero-glyph-${i}`} viewBox={VIEWBOX}>
+            // The whole cell, the icon in its middle: the margin around it is hit by the pointer too.
+            <symbol key={i} id={`hero-glyph-${i}`} viewBox={CELL_VIEWBOX}>
+              <rect x={-PAD} y={-PAD} width={110 + 2 * PAD} height={110 + 2 * PAD} fill="transparent" />
               <path d={d} />
             </symbol>
           ))}
         </defs>
+        {/* The group places the cell, so the hover transform on the <use> scales it in place. */}
         {cells.map((g, n) => (
-          <use
-            key={n}
-            href={`#hero-glyph-${g}`}
-            x={(n % COLS) * PITCH + (PITCH - SIZE) / 2}
-            y={Math.floor(n / COLS) * PITCH + (PITCH - SIZE) / 2}
-            width={SIZE}
-            height={SIZE}
-            opacity={0.25 + rand(n + 5000) * 0.6}
-          />
+          <g key={n} transform={`translate(${(n % COLS) * PITCH} ${Math.floor(n / COLS) * PITCH})`}>
+            <use
+              href={`#hero-glyph-${g}`}
+              className="hero-glyph"
+              width={PITCH}
+              height={PITCH}
+              opacity={0.25 + rand(n + 5000) * 0.6}
+            />
+          </g>
         ))}
       </svg>
     </div>

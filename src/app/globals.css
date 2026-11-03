@@ -108,6 +108,17 @@ body {
   -webkit-mask-image: var(--fade);
   mask-image: var(--fade);
 }
+/* Hovering an icon of the wall grows it a little, with a slight tilt. */
+.hero-glyph {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.15s ease-out;
+}
+@media (hover: hover) {
+  .hero-glyph:hover {
+    transform: scale(1.6) rotate(-8deg);
+  }
+}
 /* Hero height is a whole number of 44px icon rows, so no row is cut at the bottom. */
 .hero-rows {
   height: calc(13 * 44px);
