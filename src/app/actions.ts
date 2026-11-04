@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { sql } from "@/lib/db";
 import { CELLS, isValidPixels } from "@/lib/pixels";
 import { isStatus, type Status } from "@/lib/status";
@@ -53,11 +54,12 @@ function assertValidatable(pixels: string, fill: string | null) {
   if (!fill || fill === EMPTY) throw new Error("Draw the fill variant before validating");
 }
 
-function revalidate(id?: number) {
+function revalidate() {
   revalidatePath("/");
   revalidatePath("/icons");
   revalidatePath("/manage");
-  if (id) revalidatePath(`/icons/${id}`);
+  // Icon pages show their neighbours too: refresh them all.
+  revalidatePath("/icons/[name]", "page");
 }
 
 type KitFields = { name: string; pixels: string; pixels_fill: string | null; status: string };
@@ -82,15 +84,20 @@ export async function nameOwner(name: string, except?: number): Promise<"icon" |
   return row ? "icon" : null;
 }
 
-/** Count one view of an icon's popup. Open to everyone; no revalidation, it's only a stat. */
+/** Crawlers, previewers and headless browsers: they run the page's script too, but aren't people. */
+const BOT = /bot|crawl|spider|slurp|scrap|preview|fetch|headless|lighthouse|inspect|facebookexternalhit|embedly|curl|wget|python|^$/i;
+
+const fromBot = async () => BOT.test((await headers()).get("user-agent") ?? "");
+
+/** Count one view of an icon, in the popup or on its page. Open to everyone; no revalidation, it's only a stat. */
 export async function recordView(id: number): Promise<void> {
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id) || (await fromBot())) return;
   await sql`UPDATE icons SET views = views + 1 WHERE id = ${id} AND status = 'validated'`;
 }
 
 /** Count one SVG download of an icon, whatever its style or variant. Open to everyone, like views. */
 export async function recordDownload(id: number): Promise<void> {
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id) || (await fromBot())) return;
   await sql`UPDATE icons SET downloads = downloads + 1 WHERE id = ${id} AND status = 'validated'`;
 }
 
@@ -149,7 +156,7 @@ export async function updateIcon(
     `,
   ]);
   if (changesKit(before, { name: n, pixels, pixels_fill: fill, status })) scheduleKitRebuild();
-  revalidate(id);
+  revalidate();
 }
 
 /**
@@ -161,7 +168,7 @@ export async function duplicateIcon(
   alts: string[],
   pixels: string,
   fill: string | null,
-): Promise<number> {
+): Promise<string> {
   assertCanEdit();
   const base = `${cleanName(name).replace(/-copy(-\d+)?$/, "")}-copy`;
   const taken = new Set(
@@ -169,7 +176,8 @@ export async function duplicateIcon(
   );
   let copy = base;
   for (let n = 2; taken.has(copy); n++) copy = `${base}-${n}`;
-  return createIcon(copy, alts, pixels, fill, pixels === EMPTY ? "requested" : "wip");
+  await createIcon(copy, alts, pixels, fill, pixels === EMPTY ? "requested" : "wip");
+  return copy;
 }
 
 export async function setIconStatus(id: number, status: Status): Promise<void> {
@@ -180,7 +188,7 @@ export async function setIconStatus(id: number, status: Status): Promise<void> {
   if (status === "validated") assertValidatable(before.pixels, before.pixels_fill);
   await sql`UPDATE icons SET status = ${status}, updated_at = now() WHERE id = ${id}`;
   if (changesKit(before, { ...before, status })) scheduleKitRebuild();
-  revalidate(id);
+  revalidate();
 }
 
 export async function deleteIcon(id: number): Promise<void> {

@@ -45,6 +45,14 @@ export async function getIcon(id: number): Promise<Icon | null> {
   return rows[0] ?? null;
 }
 
+/** Any icon by its name, whatever its status. */
+export async function getIconByName(name: string): Promise<Icon | null> {
+  const rows = (await sql`
+    SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons WHERE name = ${name}
+  `) as Icon[];
+  return rows[0] ?? null;
+}
+
 /** A public (validated) icon by its name. */
 export async function getValidatedIconByName(name: string): Promise<Icon | null> {
   const rows = (await sql`

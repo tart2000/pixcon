@@ -27,6 +27,7 @@ import { importPhosphor } from "@/lib/phosphor";
 import { toSlug, typingSlug } from "@/lib/slug";
 import { reservedReason } from "@/lib/reserved";
 import { AltsInput } from "./AltsInput";
+import { editUrl } from "@/lib/paths";
 import { STATUSES, type Status } from "@/lib/status";
 
 type Grids = Record<Variant, Grid>;
@@ -204,11 +205,13 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
           await updateIcon(icon.id, name, alts, pixels, fill, status);
           setSaved({ name: toSlug(name), alts: alts.join(","), pixels, fill, status });
           setName(toSlug);
-          router.refresh();
+          // The page lives at the icon's name: follow a rename.
+          if (toSlug(name) !== icon.name) router.replace(editUrl(toSlug(name)));
+          else router.refresh();
         } else {
-          const id = await createIcon(name, alts, pixels, fill, status);
+          await createIcon(name, alts, pixels, fill, status);
           setSaved({ name: toSlug(name), alts: alts.join(","), pixels, fill, status });
-          router.push(`/icons/${id}`);
+          router.push(editUrl(toSlug(name)));
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong");
@@ -236,8 +239,8 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
     setError(null);
     startTransition(async () => {
       try {
-        const id = await duplicateIcon(name || icon?.name || "icon", alts, current.pixels, current.fill);
-        router.push(`/icons/${id}`);
+        const copy = await duplicateIcon(name || icon?.name || "icon", alts, current.pixels, current.fill);
+        router.push(editUrl(copy));
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong");
       }

@@ -182,3 +182,11 @@ body {
 .range:focus-visible::-moz-range-thumb {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 20%, transparent);
 }
+
+/* Scrolls without showing a bar (sliders with their own arrows). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

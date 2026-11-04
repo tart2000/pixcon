@@ -20,6 +20,9 @@ export const STYLES = [
 
 export type StyleId = (typeof STYLES)[number]["id"];
 
+/** The style icons are shown in until one is picked. */
+export const DEFAULT_STYLE: StyleId = "liquid-blob";
+
 /** The style asked for in a page's query (?style=), if it is one. */
 export const styleFrom = (query: { style?: string | string[] }): StyleId | undefined =>
   STYLES.find((s) => s.id === query.style)?.id;

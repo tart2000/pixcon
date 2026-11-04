@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { DEFAULT_STYLE, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
@@ -19,8 +19,6 @@ import { recordDownload } from "@/app/actions";
 import { CheckIcon, CloseIcon, CopyIcon, DownloadIcon } from "./UiIcons";
 
 type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
-
-const DEFAULT_STYLE: StyleId = "liquid-blob";
 
 /** `initialStyle` comes from the link that opened the gallery (?style=). */
 export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialStyle?: StyleId }) {

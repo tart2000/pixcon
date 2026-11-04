@@ -10,6 +10,7 @@ import { toSlug, typingSlug } from "@/lib/slug";
 import { canEdit } from "@/lib/editing";
 import { reservedReason } from "@/lib/reserved";
 import { Segmented } from "./Segmented";
+import { editUrl, iconUrl } from "@/lib/paths";
 
 type Item = {
   id: number;
@@ -198,7 +199,15 @@ export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initia
                 </div>
                 <div className="min-w-0">
                   {canEdit ? (
-                    <Link href={`/icons/${i.id}`} className="block truncate font-mono text-sm hover:underline">
+                    <Link href={editUrl(i.name)} className="block truncate font-mono text-sm hover:underline">
+                      {i.name}
+                    </Link>
+                  ) : i.status === "validated" ? (
+                    // Shipped icons have their own public page.
+                    <Link
+                      href={iconUrl(i.name)}
+                      className="block truncate font-mono text-sm hover:underline"
+                    >
                       {i.name}
                     </Link>
                   ) : (
@@ -229,7 +238,7 @@ export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initia
                   </span>
                 )}
                 {canEdit && (
-                  <Link href={`/icons/${i.id}`} className="btn hidden h-8 sm:inline-flex">
+                  <Link href={editUrl(i.name)} className="btn hidden h-8 sm:inline-flex">
                     {i.status === "requested" ? "Draw" : "Edit"}
                   </Link>
                 )}
