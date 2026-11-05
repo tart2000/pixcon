@@ -24,10 +24,18 @@ export function LibraryPreview({ icons, total }: { icons: Item[]; total: number 
         <StyleSelect value={style} onChange={setStyle} />
         <Segmented label="Variant" options={VARIANTS} value={variant} onChange={setVariant} />
         <GridToggle value={grid} onChange={setGrid} />
+        {/* A plain form: the search runs on /icons, which reads ?q= — works before any JS loads. */}
+        <form action="/icons" role="search" className="order-last w-full sm:order-none sm:w-auto sm:flex-1">
+          <input
+            type="search"
+            name="q"
+            aria-label="Search icons"
+            className="input w-full"
+            placeholder={`Search ${total} free icons…`}
+          />
+        </form>
         {/* The picked colour themes the whole site, these icons included. */}
-        <div className="sm:ml-auto">
-          <ColorPicker />
-        </div>
+        <ColorPicker />
       </div>
       <ul className="grid grid-cols-4 overflow-hidden rounded-lg border border-border sm:grid-cols-6 lg:grid-cols-8">
         {icons.map((i) => (

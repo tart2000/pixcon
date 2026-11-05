@@ -1,5 +1,6 @@
 import { decode } from "@/lib/pixels";
 import { iconPath } from "@/lib/svg";
+import { HeroShuffle } from "./HeroShuffle";
 
 const COLS = 64;
 /** Enough rows for the tallest hero (phones); the hero's height is a whole number of rows (see .hero-rows). */
@@ -53,7 +54,7 @@ function layout(glyphs: number) {
 /**
  * A wall of small pixel icons behind the hero, faded out in the middle so the text stays readable.
  * One SVG: each glyph is a <symbol>, each cell a <use>. Rows start at the top edge so none is cut there.
- * Each icon grows and tilts under the pointer (see .hero-glyph).
+ * Each icon grows and tilts under the pointer (see .hero-glyph), and now and then one turns into another (HeroShuffle).
  */
 export function HeroPattern({ icons }: { icons: { pixels: string; fill: string | null }[] }) {
   if (!icons.length) return null;
@@ -85,6 +86,7 @@ export function HeroPattern({ icons }: { icons: { pixels: string; fill: string |
           </g>
         ))}
       </svg>
+      <HeroShuffle glyphs={glyphs.length} />
     </div>
   );
 }
