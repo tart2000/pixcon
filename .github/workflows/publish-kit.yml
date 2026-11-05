@@ -11,14 +11,27 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm trusted publishing (no token) and provenance
-
-concurrency: publish-kit
 
 jobs:
-  publish:
-    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+  # A deployment_status run has no branch, and npm's provenance check refuses a signature without one:
+  # start a regular run on main instead.
+  after-deploy:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - run: gh workflow run publish-kit.yml --repo "$GITHUB_REPOSITORY" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  publish:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    concurrency: publish-kit
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (no token) and provenance
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
