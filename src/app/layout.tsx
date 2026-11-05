@@ -120,6 +120,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               >
                 POC studio
               </a>
+              {" · "}
+              <Link href="/terms" className="underline underline-offset-4 hover:opacity-80">
+                Terms of sale
+              </Link>
             </p>
           </div>
         </footer>

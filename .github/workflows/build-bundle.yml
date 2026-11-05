@@ -1,0 +1,28 @@
+# Rebuilds the paid bundle (scripts/build-bundle.mjs) and uploads it to the private Blob store, so buyers' links
+# always serve every validated icon. Runs every hour and only rebuilds when the icons or the drawing code changed.
+name: Build the bundle
+
+on:
+  schedule:
+    - cron: "37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency: build-bundle
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: node scripts/build-bundle.mjs --upload
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}

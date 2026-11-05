@@ -2,10 +2,11 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/merch/stripe";
 import { createDraftOrder, SITE_URL } from "@/lib/merch/printful";
 import { SHIPPING_PRICE, findProduct, findProductInk, isStyle, isVariant, printUrl } from "@/lib/merch/products";
+import { fulfillBundle } from "@/lib/bundle";
 
 /**
- * Stripe calls this when a checkout is paid: we pass the order on to Printful, as a draft.
- * Anything but a 2xx makes Stripe retry, so a failed Printful call is answered with a 500.
+ * Stripe calls this when a checkout is paid: a shop order goes on to Printful, as a draft; a bundle purchase is
+ * recorded and its download link emailed. Anything but a 2xx makes Stripe retry, so a failure is answered with a 500.
  */
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -22,11 +23,12 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
     const session = event.data.object;
     if (session.payment_status === "paid") {
+      const bundle = session.metadata?.kind === "bundle";
       try {
-        await sendToPrintful(session);
+        await (bundle ? fulfillBundle(session) : sendToPrintful(session));
       } catch (e) {
-        console.error(`Printful order for ${session.id} failed:`, e);
-        return new Response("Printful order failed", { status: 500 });
+        console.error(`${bundle ? "Bundle" : "Printful order"} for ${session.id} failed:`, e);
+        return new Response(bundle ? "Bundle fulfilment failed" : "Printful order failed", { status: 500 });
       }
     }
   }

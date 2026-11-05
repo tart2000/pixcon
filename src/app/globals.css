@@ -190,3 +190,21 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* The bundle wall: a tile that changes pops in with a little tilt. */
+@keyframes wall-pop {
+  0% {
+    transform: scale(0.3) rotate(-25deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+.wall-pop {
+  animation: wall-pop 0.45s ease-out;
+}

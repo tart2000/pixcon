@@ -5,6 +5,7 @@ import { listIcons } from "@/lib/db";
 import { VARIANTS } from "@/lib/pixels";
 import { STYLES, type StyleId } from "@/lib/svg";
 import { IconGlyph } from "@/components/IconGlyph";
+import { BundleWall } from "@/components/BundleWall";
 import { HeroPattern } from "@/components/home/HeroPattern";
 import { LibraryPreview } from "@/components/home/LibraryPreview";
 import { ProductPreview, ProductTabLabel, productTabClass } from "@/components/shop/ProductVisuals";
@@ -13,6 +14,7 @@ import { KIT_SCRIPT } from "@/lib/kit";
 import { kitSizeKB } from "@/lib/kitSize";
 import { canEdit } from "@/lib/editing";
 import { INKS, PRODUCTS, findColor } from "@/lib/merch/products";
+import { BUNDLE_PRICE, bundleIconCount } from "@/lib/bundle";
 
 /** Icons shown in the library preview, when they exist. */
 const PREVIEW = [
@@ -82,6 +84,10 @@ export default async function Home() {
     ...PREVIEW.flatMap((n) => byName.get(n) ?? []),
     ...[...byName.values()].filter((i) => !PREVIEW.includes(i.name)),
   ].slice(0, PREVIEW.length);
+  // The bundle teaser's wall picks from icons spread over the whole library.
+  const bundleSample = Array.from({ length: Math.min(60, icons.length) }, (_, n) => icons[Math.floor((n * icons.length) / 60)]).map(
+    (i) => ({ name: i.name, pixels: i.pixels, fill: i.pixels_fill }),
+  );
   // Round down to a modest figure so the "+" stays true: 334 → 300+.
   const step = icons.length >= 100 ? 100 : 10;
   const count = icons.length >= 20 ? `${Math.floor(icons.length / step) * step}+` : String(icons.length);
@@ -240,6 +246,29 @@ export default async function Home() {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      {/* The paid bundle: linked from here only, not from the nav. Its wall shuffles like the bundle page's. */}
+      <section className="grid items-center gap-10 overflow-hidden rounded-xl bg-foreground p-6 text-on-foreground sm:p-10 lg:grid-cols-2">
+        <BundleWall
+          drawings={bundleSample}
+          count={24}
+          className="grid grid-cols-6 gap-1.5 sm:gap-3"
+          tileClassName="flex aspect-square items-center justify-center rounded-lg bg-on-foreground/10"
+          size={36}
+        />
+        <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:text-left">
+          <span className="font-mono text-xs tracking-[0.2em] uppercase opacity-70">The bundle</span>
+          <h2 className="font-display text-4xl sm:text-5xl">Want them all, offline?</h2>
+          <p className="max-w-md opacity-80">
+            <strong className="font-semibold">{bundleIconCount(icons.length)} icons included!</strong> Every drawing in all{" "}
+            {STYLES.length} styles, regular and fill, as SVG and PNG files. One zip, free updates.
+          </p>
+          <Link href="/bundle" className="btn-fun mt-2">
+            {glyph("download")}
+            Get the bundle · €{BUNDLE_PRICE}
+          </Link>
         </div>
       </section>
 

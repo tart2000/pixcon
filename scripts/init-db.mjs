@@ -33,3 +33,21 @@ await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_reserved_check CHECK (name
   'pixel', 'rounded', 'blob', 'liquid', 'liquid-blob', 'retro', 'stitch', 'knit', 'dots', 'quirky', 'studs', 'mosaic', 'halftone', 'grainy', 'patchwork', 'gridded', 'regular', 'fill', 'xs', 'sm', 'lg', 'xl', '2x', '3x', 'spin', 'fw'
 ))`;
 console.log("icons table ready");
+
+// Bundle purchases: one row per paid Stripe Checkout. The token is the buyer's permanent download link.
+await sql`
+  CREATE TABLE IF NOT EXISTS purchases (
+    id SERIAL PRIMARY KEY,
+    token TEXT NOT NULL UNIQUE,
+    session_id TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    currency TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    -- Set once the email with the link went out, so it's sent exactly once.
+    emailed_at TIMESTAMPTZ,
+    downloads INTEGER NOT NULL DEFAULT 0,
+    last_download_at TIMESTAMPTZ
+  )
+`;
+console.log("purchases table ready");
