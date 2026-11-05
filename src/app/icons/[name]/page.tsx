@@ -43,6 +43,7 @@ export async function generateMetadata(props: Props) {
     `${icon.name} pixel icon`,
     `Free ${icon.name} pixel icon${tags}, in ${STYLES.length} styles, regular or fill. Copy the HTML, or download it as SVG or PNG.`,
     iconUrl(icon.name),
+    `${iconUrl(icon.name)}/opengraph-image`,
   );
 }
 
