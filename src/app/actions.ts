@@ -9,7 +9,7 @@ import { cleanAlts } from "@/lib/alts";
 import { toSlug } from "@/lib/slug";
 import { assertCanEdit } from "@/lib/editing";
 import { reservedReason } from "@/lib/reserved";
-import { rebuildKitNow, scheduleKitRebuild } from "@/lib/kitRebuild";
+import { publishKit } from "@/lib/kitPublish";
 
 const EMPTY = "0".repeat(CELLS);
 
@@ -44,14 +44,20 @@ async function findRequest(name: string, except?: number): Promise<{ id: number;
 function clean(name: string, pixels: string, fill: string | null, status: Status) {
   if (!isValidPixels(pixels) || (fill !== null && !isValidPixels(fill))) throw new Error("Invalid pixels");
   if (!isStatus(status)) throw new Error("Invalid status");
-  if (status === "validated") assertValidatable(pixels, fill);
+  if (status === "ready" || status === "validated") assertDrawn(pixels, fill);
   return cleanName(name);
 }
 
-/** Only icons with both variants drawn can be validated. */
-function assertValidatable(pixels: string, fill: string | null) {
-  if (pixels === EMPTY) throw new Error("Draw the regular variant before validating");
-  if (!fill || fill === EMPTY) throw new Error("Draw the fill variant before validating");
+/** Only icons with both variants drawn can be marked ready (and so validated). */
+function assertDrawn(pixels: string, fill: string | null) {
+  if (pixels === EMPTY) throw new Error("Draw the regular variant before marking it ready");
+  if (!fill || fill === EMPTY) throw new Error("Draw the fill variant before marking it ready");
+}
+
+/** Icons only become validated by publishing the kit; one that already is can stay so. */
+function assertNotPublishing(status: Status, before?: { status: string }) {
+  if (status === "validated" && before?.status !== "validated")
+    throw new Error("Icons can’t be validated directly any more: use “Mark ready”, then “Publish the kit” on /manage");
 }
 
 function revalidate() {
@@ -62,17 +68,9 @@ function revalidate() {
   revalidatePath("/icons/[name]", "page");
 }
 
-type KitFields = { name: string; pixels: string; pixels_fill: string | null; status: string };
-
-/** The kit holds the name and both grids of every validated icon: rebuild it when one of those changes. */
-function changesKit(before: KitFields | undefined, after: KitFields | undefined) {
-  const inKit = (i?: KitFields) => (i?.status === "validated" ? [i.name, i.pixels, i.pixels_fill].join() : null);
-  return inKit(before) !== inKit(after);
-}
-
-async function kitFields(id: number): Promise<KitFields | undefined> {
-  const [row] = await sql`SELECT name, pixels, pixels_fill, status FROM icons WHERE id = ${id}`;
-  return row as KitFields | undefined;
+async function iconState(id: number) {
+  const [row] = await sql`SELECT pixels, pixels_fill, status FROM icons WHERE id = ${id}`;
+  return row as { pixels: string; pixels_fill: string | null; status: string } | undefined;
 }
 
 /** Live check for the editor: is this slug free, held by an empty request (saving fills it), or used by another icon? */
@@ -118,6 +116,7 @@ export async function createIcon(
 ): Promise<number> {
   assertCanEdit();
   const n = clean(name, pixels, fill, status);
+  assertNotPublishing(status);
   const request = await findRequest(n);
   if (!request) await assertFreeName(n);
   const rows = request
@@ -129,7 +128,6 @@ export async function createIcon(
         INSERT INTO icons (name, alts, pixels, pixels_fill, status)
         VALUES (${n}, ${cleanAlts(alts)}, ${pixels}, ${fill}, ${status}) RETURNING id
       `;
-  if (status === "validated") scheduleKitRebuild();
   revalidate();
   return rows[0].id as number;
 }
@@ -145,9 +143,9 @@ export async function updateIcon(
   assertCanEdit();
   const n = clean(name, pixels, fill, status);
   // Renaming onto an empty request replaces it.
+  assertNotPublishing(status, await iconState(id));
   const request = await findRequest(n, id);
   if (!request) await assertFreeName(n, id);
-  const before = await kitFields(id);
   await sql.transaction([
     sql`DELETE FROM icons WHERE id = ${request?.id ?? null}`,
     sql`
@@ -155,7 +153,6 @@ export async function updateIcon(
       WHERE id = ${id}
     `,
   ]);
-  if (changesKit(before, { name: n, pixels, pixels_fill: fill, status })) scheduleKitRebuild();
   revalidate();
 }
 
@@ -183,25 +180,23 @@ export async function duplicateIcon(
 export async function setIconStatus(id: number, status: Status): Promise<void> {
   assertCanEdit();
   if (!isStatus(status)) throw new Error("Invalid status");
-  const before = await kitFields(id);
+  const before = await iconState(id);
   if (!before) throw new Error("Icon not found");
-  if (status === "validated") assertValidatable(before.pixels, before.pixels_fill);
+  assertNotPublishing(status, before);
+  if (status === "ready") assertDrawn(before.pixels, before.pixels_fill);
   await sql`UPDATE icons SET status = ${status}, updated_at = now() WHERE id = ${id}`;
-  if (changesKit(before, { ...before, status })) scheduleKitRebuild();
   revalidate();
 }
 
 export async function deleteIcon(id: number): Promise<void> {
   assertCanEdit();
-  const before = await kitFields(id);
   await sql`DELETE FROM icons WHERE id = ${id}`;
-  if (changesKit(before, undefined)) scheduleKitRebuild();
   revalidate();
 }
 
-/** Send the pending kit rebuild right away instead of waiting for the delay. */
+/** Put the ready icons online and rebuild the kit with them: the only thing that redeploys the site. */
 export async function publishKitNow(): Promise<void> {
   assertCanEdit();
-  await rebuildKitNow();
-  revalidatePath("/manage");
+  await publishKit();
+  revalidate();
 }

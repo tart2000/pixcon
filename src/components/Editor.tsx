@@ -192,15 +192,15 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
   };
 
   // ---- Persistence ----
-  /** Save the current state; `as` overrides the status (used by Validate). */
+  /** Save the current state; `as` overrides the status (used by Mark ready). */
   const save = (as: Status = nextStatus) => {
     setError(null);
     startTransition(async () => {
       try {
         const { pixels, fill } = current;
         const status = as;
-        if (status === "validated" && (pixels === EMPTY || !fill))
-          throw new Error("Draw both variants before validating");
+        if ((status === "ready" || status === "validated") && (pixels === EMPTY || !fill))
+          throw new Error("Draw both variants before marking it ready");
         if (icon) {
           await updateIcon(icon.id, name, alts, pixels, fill, status);
           setSaved({ name: toSlug(name), alts: alts.join(","), pixels, fill, status });
@@ -409,12 +409,12 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
             </button>
             {icon && (
               <Menu label="More actions" disabled={pending}>
-                {saved.status !== "validated" && (
+                {(saved.status === "requested" || saved.status === "wip") && (
                   <MenuItem
-                    onSelect={() => save("validated")}
+                    onSelect={() => save("ready")}
                     disabled={!nameOk || current.pixels === EMPTY || !current.fill}
                   >
-                    Validate
+                    Mark ready
                     <span className="ml-auto text-xs text-muted">
                       {current.pixels === EMPTY ? "needs regular" : !current.fill ? "needs fill" : dirty && "saves changes"}
                     </span>

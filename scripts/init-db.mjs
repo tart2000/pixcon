@@ -13,10 +13,10 @@ await sql`
 `;
 // Each icon has a "regular" drawing and an optional "fill" variant.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS pixels_fill CHAR(121)`;
-// Workflow: requested (just a name) → wip → validated. Only validated icons are public.
+// Workflow: requested (just a name) → wip → ready → validated (by publishing the kit). Only validated icons are public.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'requested'`;
 await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_status_check`;
-await sql`ALTER TABLE icons ADD CONSTRAINT icons_status_check CHECK (status IN ('requested', 'wip', 'validated'))`;
+await sql`ALTER TABLE icons ADD CONSTRAINT icons_status_check CHECK (status IN ('requested', 'wip', 'ready', 'validated'))`;
 // Alternative names (tags) used by search, e.g. "love" for heart.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS alts TEXT[] NOT NULL DEFAULT '{}'`;
 // The name is the icon's slug: lowercase letters, digits and single dashes, unique.
@@ -33,6 +33,18 @@ await sql`ALTER TABLE icons ADD CONSTRAINT icons_name_reserved_check CHECK (name
   'pixel', 'rounded', 'blob', 'liquid', 'liquid-blob', 'retro', 'stitch', 'knit', 'dots', 'quirky', 'studs', 'mosaic', 'halftone', 'grainy', 'patchwork', 'gridded', 'regular', 'fill', 'xs', 'sm', 'lg', 'xl', '2x', '3x', 'spin', 'fw'
 ))`;
 console.log("icons table ready");
+
+// One row: what the live kit holds (written by production builds) and when a build was last asked for.
+await sql`
+  CREATE TABLE IF NOT EXISTS kit_state (
+    id BOOLEAN PRIMARY KEY DEFAULT true CHECK (id),
+    built_hash TEXT,
+    built_at TIMESTAMPTZ,
+    requested_at TIMESTAMPTZ
+  )
+`;
+await sql`INSERT INTO kit_state (id) VALUES (true) ON CONFLICT (id) DO NOTHING`;
+console.log("kit_state table ready");
 
 // Bundle purchases: one row per paid Stripe Checkout. The token is the buyer's permanent download link.
 await sql`

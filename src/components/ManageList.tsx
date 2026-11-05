@@ -218,7 +218,7 @@ export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initia
                 {canEdit ? (
                   <StatusSelect
                     value={i.status}
-                    canValidate={!isBlank(i.pixels) && !isBlank(i.fill)}
+                    canMarkReady={!isBlank(i.pixels) && !isBlank(i.fill)}
                     disabled={pending}
                     onChange={(s) => run(() => setIconStatus(i.id, s))}
                   />
@@ -276,12 +276,12 @@ function StatusBadge({ status }: { status: Status }) {
 
 function StatusSelect({
   value,
-  canValidate,
+  canMarkReady,
   disabled,
   onChange,
 }: {
   value: Status;
-  canValidate: boolean;
+  canMarkReady: boolean;
   disabled: boolean;
   onChange: (s: Status) => void;
 }) {
@@ -292,7 +292,11 @@ function StatusSelect({
       disabled={disabled}
       onChange={onChange}
       dot={STATUSES.find((s) => s.id === value)!.dot}
-      options={STATUSES.map((s) => ({ ...s, disabled: s.id === "validated" && !canValidate }))}
+      // Validated comes only from publishing the kit (/manage's banner); ready needs both variants drawn.
+      options={STATUSES.map((s) => ({
+        ...s,
+        disabled: (s.id === "validated" && value !== "validated") || (s.id === "ready" && !canMarkReady),
+      }))}
     />
   );
 }
