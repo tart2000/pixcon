@@ -108,7 +108,7 @@ export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialSty
           <input
             ref={searchRef}
             className="input h-12 w-full px-4 pr-12 text-base"
-            placeholder={`Search ${icons.length} icons…`}
+            placeholder={`Search ${icons.length} free icons…`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Escape" && setQuery("")}
