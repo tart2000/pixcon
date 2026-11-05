@@ -1,8 +1,10 @@
 # Rebuilds the paid bundle (scripts/build-bundle.mjs) and uploads it to the private Blob store, so buyers' links
-# always serve every validated icon. Runs every hour and only rebuilds when the icons or the drawing code changed.
+# always serve every validated icon. Runs as soon as a production deploy succeeds (publishing the kit on /manage
+# deploys), with an hourly run as a safety net; only rebuilds when the icons or the drawing code changed.
 name: Build the bundle
 
 on:
+  deployment_status:
   schedule:
     - cron: "37 * * * *"
   workflow_dispatch:
@@ -14,6 +16,7 @@ concurrency: build-bundle
 
 jobs:
   build:
+    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
