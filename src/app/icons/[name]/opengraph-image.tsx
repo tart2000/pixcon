@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
-import { getValidatedIconByName } from "@/lib/db";
+import { getPublicIconByName } from "@/lib/db";
 import { decode } from "@/lib/pixels";
 import { DEFAULT_STYLE, iconSvg, STYLES, type StyleId } from "@/lib/svg";
 
@@ -24,7 +24,7 @@ const img = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).toStr
 export default async function Image({ params }: { params: Promise<{ name: string }> }) {
   const name = decodeURIComponent((await params).name);
   const [icon, display, mono, logo] = await Promise.all([
-    getValidatedIconByName(name),
+    getPublicIconByName(name),
     asset("LondrinaSolid-Regular.ttf"),
     asset("GeistMono-Regular.ttf"),
     // The favicon, without its dark-mode stylesheet (the image is always light).

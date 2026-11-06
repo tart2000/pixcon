@@ -9,7 +9,7 @@ const SITE = "https://www.pixicons.io";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const icons = await listIcons("validated");
+  const icons = await listIcons("public");
   return [
     { url: SITE, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE}/icons`, changeFrequency: "daily", priority: 0.9 },

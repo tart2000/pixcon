@@ -1,5 +1,5 @@
 import { Resvg } from "@resvg/resvg-js";
-import { getValidatedIconByName } from "@/lib/db";
+import { getPublicIconByName } from "@/lib/db";
 import { findProduct, findProductInk, isStyle, isVariant, printSvg } from "@/lib/merch/products";
 
 /**
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     return new Response("Invalid design", { status: 400 });
   }
 
-  const icon = await getValidatedIconByName(name);
+  const icon = await getPublicIconByName(name);
   const pixels = variant === "fill" ? icon?.pixels_fill : icon?.pixels;
   if (!pixels) return new Response("Icon not found", { status: 404 });
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { requestIcon, setIconStatus } from "@/app/actions";
-import { STATUSES, type Status } from "@/lib/status";
+import { STATUSES, isPublic, type Status } from "@/lib/status";
 import { IconGlyph } from "./IconGlyph";
 import { matchesQuery } from "@/lib/alts";
 import { toSlug, typingSlug } from "@/lib/slug";
@@ -202,7 +202,7 @@ export function ManageList({ icons, initialQuery = "" }: { icons: Item[]; initia
                     <Link href={editUrl(i.name)} className="block truncate font-mono text-sm hover:underline">
                       {i.name}
                     </Link>
-                  ) : i.status === "validated" ? (
+                  ) : isPublic(i.status) ? (
                     // Shipped icons have their own public page.
                     <Link
                       href={iconUrl(i.name)}
@@ -292,10 +292,10 @@ function StatusSelect({
       disabled={disabled}
       onChange={onChange}
       dot={STATUSES.find((s) => s.id === value)!.dot}
-      // Validated comes only from publishing the kit (/manage's banner); ready needs both variants drawn.
+      // New and validated come only from publishing the kit (/manage's banner); ready needs both variants drawn.
       options={STATUSES.map((s) => ({
         ...s,
-        disabled: (s.id === "validated" && value !== "validated") || (s.id === "ready" && !canMarkReady),
+        disabled: (isPublic(s.id) && value !== s.id) || (s.id === "ready" && !canMarkReady),
       }))}
     />
   );

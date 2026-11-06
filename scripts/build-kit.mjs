@@ -5,7 +5,7 @@ import { toHex } from "../src/lib/pixels.ts";
 import { kitHash } from "../src/lib/kitVersion.ts";
 
 const sql = neon(process.env.DATABASE_URL);
-const rows = await sql`SELECT name, pixels, pixels_fill FROM icons WHERE status = 'validated' ORDER BY name`;
+const rows = await sql`SELECT name, pixels, pixels_fill FROM icons WHERE status IN ('new', 'validated') ORDER BY name`;
 const icons = Object.fromEntries(rows.map((r) => [r.name, [toHex(r.pixels), r.pixels_fill ? toHex(r.pixels_fill) : null]]));
 
 await build({

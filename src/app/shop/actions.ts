@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { getValidatedIconByName } from "@/lib/db";
+import { getPublicIconByName } from "@/lib/db";
 import { STYLES } from "@/lib/svg";
 import { SHIPPING_COUNTRIES, SHIPPING_PRICE, findColor, findProduct, findProductInk, isStyle, isVariant, priceOf } from "@/lib/merch/products";
 import { stripe } from "@/lib/merch/stripe";
@@ -25,7 +25,7 @@ export async function startCheckout(design: Design) {
   if (!product || !ink || !color || !sized || !isStyle(design.style) || !isVariant(design.variant)) {
     throw new Error("Invalid design");
   }
-  const icon = await getValidatedIconByName(design.icon);
+  const icon = await getPublicIconByName(design.icon);
   if (!icon || (design.variant === "fill" && !icon.pixels_fill)) throw new Error("Icon not found");
 
   const style = STYLES.find((s) => s.id === design.style)!.label;

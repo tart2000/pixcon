@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { sql } from "@/lib/db";
 import { CELLS, isValidPixels } from "@/lib/pixels";
-import { isStatus, type Status } from "@/lib/status";
+import { isPublic, isStatus, type Status } from "@/lib/status";
 import { cleanAlts } from "@/lib/alts";
 import { toSlug } from "@/lib/slug";
 import { assertCanEdit } from "@/lib/editing";
@@ -44,7 +44,7 @@ async function findRequest(name: string, except?: number): Promise<{ id: number;
 function clean(name: string, pixels: string, fill: string | null, status: Status) {
   if (!isValidPixels(pixels) || (fill !== null && !isValidPixels(fill))) throw new Error("Invalid pixels");
   if (!isStatus(status)) throw new Error("Invalid status");
-  if (status === "ready" || status === "validated") assertDrawn(pixels, fill);
+  if (status === "ready" || isPublic(status)) assertDrawn(pixels, fill);
   return cleanName(name);
 }
 
@@ -54,10 +54,10 @@ function assertDrawn(pixels: string, fill: string | null) {
   if (!fill || fill === EMPTY) throw new Error("Draw the fill variant before marking it ready");
 }
 
-/** Icons only become validated by publishing the kit; one that already is can stay so. */
+/** Icons only become new, then validated, by publishing the kit; one that already is can stay so. */
 function assertNotPublishing(status: Status, before?: { status: string }) {
-  if (status === "validated" && before?.status !== "validated")
-    throw new Error("Icons can’t be validated directly any more: use “Mark ready”, then “Publish the kit” on /manage");
+  if (isPublic(status) && before?.status !== status)
+    throw new Error("Icons can’t be published directly: use “Mark ready”, then “Publish the kit” on /manage");
 }
 
 function revalidate() {
@@ -90,13 +90,13 @@ const fromBot = async () => BOT.test((await headers()).get("user-agent") ?? "");
 /** Count one view of an icon, in the popup or on its page. Open to everyone; no revalidation, it's only a stat. */
 export async function recordView(id: number): Promise<void> {
   if (!Number.isInteger(id) || (await fromBot())) return;
-  await sql`UPDATE icons SET views = views + 1 WHERE id = ${id} AND status = 'validated'`;
+  await sql`UPDATE icons SET views = views + 1 WHERE id = ${id} AND status IN ('new', 'validated')`;
 }
 
 /** Count one SVG download of an icon, whatever its style or variant. Open to everyone, like views. */
 export async function recordDownload(id: number): Promise<void> {
   if (!Number.isInteger(id) || (await fromBot())) return;
-  await sql`UPDATE icons SET downloads = downloads + 1 WHERE id = ${id} AND status = 'validated'`;
+  await sql`UPDATE icons SET downloads = downloads + 1 WHERE id = ${id} AND status IN ('new', 'validated')`;
 }
 
 /** Ask for an icon: just a name, to be drawn later. Open to everyone, unlike the other actions. */

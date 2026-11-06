@@ -62,7 +62,7 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
 
 export default async function Home() {
   await connection();
-  const icons = await listIcons("validated");
+  const icons = await listIcons("public");
   const byName = new Map(icons.map((i) => [i.name, { name: i.name, pixels: i.pixels, fill: i.pixels_fill }]));
   const glyph = (name: string, size = 20) => {
     const i = byName.get(name);

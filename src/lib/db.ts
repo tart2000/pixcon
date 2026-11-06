@@ -1,6 +1,6 @@
 import "server-only";
 import { neon } from "@neondatabase/serverless";
-import type { Status } from "./status";
+import { PUBLIC_STATUSES, type Status } from "./status";
 
 export const sql = neon(process.env.DATABASE_URL!);
 
@@ -22,20 +22,30 @@ export type Icon = {
   updated_at: string;
 };
 
-/** All icons, or only those with the given status; most recently updated first. */
-export async function listIcons(status?: Status): Promise<Icon[]> {
+/** All icons, only those with the given status, or the public ones (new and validated); most recently updated first. */
+export async function listIcons(status?: Status | "public"): Promise<Icon[]> {
+  const statuses = status === "public" ? [...PUBLIC_STATUSES] : status ? [status] : null;
   return (await sql`
     SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons
-    WHERE ${status ?? null}::text IS NULL OR status = ${status ?? null}
+    WHERE ${statuses}::text[] IS NULL OR status = ANY(${statuses}::text[])
     ORDER BY updated_at DESC
   `) as Icon[];
 }
 
-/** Validated icons by name, as the gallery needs them. */
+/** Public icons by name, as the gallery needs them; `isNew` for the latest published batch. */
 export async function listGalleryIcons() {
-  return (await listIcons("validated"))
+  return (await listIcons("public"))
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map(({ id, name, alts, pixels, pixels_fill, views, downloads }) => ({ id, name, alts, pixels, fill: pixels_fill, views, downloads }));
+    .map(({ id, name, alts, pixels, pixels_fill, views, downloads, status }) => ({
+      id,
+      name,
+      alts,
+      pixels,
+      fill: pixels_fill,
+      views,
+      downloads,
+      isNew: status === "new",
+    }));
 }
 
 export async function getIcon(id: number): Promise<Icon | null> {
@@ -53,24 +63,24 @@ export async function getIconByName(name: string): Promise<Icon | null> {
   return rows[0] ?? null;
 }
 
-/** A public (validated) icon by its name. */
-export async function getValidatedIconByName(name: string): Promise<Icon | null> {
+/** A public (new or validated) icon by its name. */
+export async function getPublicIconByName(name: string): Promise<Icon | null> {
   const rows = (await sql`
     SELECT id, name, pixels, pixels_fill, status, alts, views, downloads, created_at, updated_at FROM icons
-    WHERE name = ${name} AND status = 'validated'
+    WHERE name = ${name} AND status IN ('new', 'validated')
   `) as Icon[];
   return rows[0] ?? null;
 }
 
-/** 1-based rank of a validated icon among validated icons, oldest first; null when it isn't validated. */
+/** 1-based rank of a public icon among public icons, oldest first; null when it isn't public. */
 export async function getIconPosition(id: number): Promise<{ index: number; total: number } | null> {
   const [row] = await sql`
     SELECT
       (SELECT status FROM icons WHERE id = ${id}) AS status,
-      (SELECT count(*) FROM icons WHERE status = 'validated' AND id <= ${id})::int AS index,
-      (SELECT count(*) FROM icons WHERE status = 'validated')::int AS total
+      (SELECT count(*) FROM icons WHERE status IN ('new', 'validated') AND id <= ${id})::int AS index,
+      (SELECT count(*) FROM icons WHERE status IN ('new', 'validated'))::int AS total
   `;
-  return row.status === "validated" ? { index: row.index, total: row.total } : null;
+  return row.status === "new" || row.status === "validated" ? { index: row.index, total: row.total } : null;
 }
 
 /** Every alt in use, most used first: suggestions for the tag input. */

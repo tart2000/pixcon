@@ -11,7 +11,7 @@ export const metadata = pageMeta(
 
 export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
   await connection();
-  const icons = (await listIcons("validated")).sort((a, b) => a.name.localeCompare(b.name));
+  const icons = (await listIcons("public")).sort((a, b) => a.name.localeCompare(b.name));
   const params = await searchParams;
   const first = (k: string) => {
     const v = params[k];

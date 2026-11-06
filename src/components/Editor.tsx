@@ -28,7 +28,7 @@ import { toSlug, typingSlug } from "@/lib/slug";
 import { reservedReason } from "@/lib/reserved";
 import { AltsInput } from "./AltsInput";
 import { editUrl } from "@/lib/paths";
-import { STATUSES, type Status } from "@/lib/status";
+import { STATUSES, isPublic, type Status } from "@/lib/status";
 
 type Grids = Record<Variant, Grid>;
 type Props = {
@@ -199,7 +199,7 @@ export function Editor({ icon, initialVariant = "regular", knownAlts, position }
       try {
         const { pixels, fill } = current;
         const status = as;
-        if ((status === "ready" || status === "validated") && (pixels === EMPTY || !fill))
+        if ((status === "ready" || isPublic(status)) && (pixels === EMPTY || !fill))
           throw new Error("Draw both variants before marking it ready");
         if (icon) {
           await updateIcon(icon.id, name, alts, pixels, fill, status);

@@ -97,7 +97,7 @@ const zip = join(cache, "pixicons.zip");
 const manifestPath = join(cache, "manifest.json");
 
 const sql = neon(process.env.DATABASE_URL);
-const icons = await sql`SELECT name, pixels, pixels_fill FROM icons WHERE status = 'validated' ORDER BY name`;
+const icons = await sql`SELECT name, pixels, pixels_fill FROM icons WHERE status IN ('new', 'validated') ORDER BY name`;
 
 // The bundle only changes with the icons (and the drawing code, which a deploy of this script carries).
 const version = sha(JSON.stringify(icons), readFileSync("src/lib/svg.ts"));

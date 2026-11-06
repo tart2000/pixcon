@@ -18,7 +18,17 @@ import { IconModal } from "./IconModal";
 import { recordDownload } from "@/app/actions";
 import { CheckIcon, CloseIcon, CopyIcon, DownloadIcon } from "./UiIcons";
 
-type Item = { id: number; name: string; alts: string[]; pixels: string; fill: string | null; views: number; downloads: number };
+type Item = {
+  id: number;
+  name: string;
+  alts: string[];
+  pixels: string;
+  fill: string | null;
+  views: number;
+  downloads: number;
+  /** In the latest published batch: badged, and found by searching "new". */
+  isNew: boolean;
+};
 
 /** `initialStyle` comes from the link that opened the gallery (?style=). */
 export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialStyle?: StyleId }) {
@@ -58,7 +68,10 @@ export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialSty
     document.title = `${category ? `${category.label} icons` : "Icons"} · Pixicons`;
   }, [category]);
   const filtered = useMemo(
-    () => icons.filter((i) => matchesQuery(i, query) && (!category || inCategory(category, i.alts))),
+    () =>
+      icons.filter(
+        (i) => matchesQuery(i.isNew ? { ...i, alts: [...i.alts, "new"] } : i, query) && (!category || inCategory(category, i.alts)),
+      ),
     [icons, query, category],
   );
   const categoryTotals = useMemo(
@@ -266,6 +279,11 @@ export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialSty
                   />
                   <span className="w-full truncate text-center font-mono text-xs text-muted">{i.name}</span>
                 </button>
+                {i.isNew && (
+                  <span className="absolute top-2 left-2 rounded-full bg-foreground px-1.5 py-0.5 font-mono text-[10px] leading-none font-semibold tracking-wide text-on-foreground uppercase">
+                    New
+                  </span>
+                )}
                 {!missing && (
                   <div className="absolute top-1.5 right-1.5 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-sm:opacity-100">
                     <button className="btn-icon size-7" title="Copy SVG" onClick={() => copy(i)}>

@@ -13,10 +13,11 @@ await sql`
 `;
 // Each icon has a "regular" drawing and an optional "fill" variant.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS pixels_fill CHAR(121)`;
-// Workflow: requested (just a name) → wip → ready → validated (by publishing the kit). Only validated icons are public.
+// Workflow: requested (just a name) → wip → ready → new (by publishing the kit) → validated (by the next publish).
+// New and validated icons are public.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'requested'`;
 await sql`ALTER TABLE icons DROP CONSTRAINT IF EXISTS icons_status_check`;
-await sql`ALTER TABLE icons ADD CONSTRAINT icons_status_check CHECK (status IN ('requested', 'wip', 'ready', 'validated'))`;
+await sql`ALTER TABLE icons ADD CONSTRAINT icons_status_check CHECK (status IN ('requested', 'wip', 'ready', 'new', 'validated'))`;
 // Alternative names (tags) used by search, e.g. "love" for heart.
 await sql`ALTER TABLE icons ADD COLUMN IF NOT EXISTS alts TEXT[] NOT NULL DEFAULT '{}'`;
 // The name is the icon's slug: lowercase letters, digits and single dashes, unique.
