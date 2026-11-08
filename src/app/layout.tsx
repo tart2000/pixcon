@@ -26,7 +26,7 @@ const londrina = Londrina_Solid({
   subsets: ["latin"],
 });
 
-const DESCRIPTION = `Open-source 11×11 pixel icons with personality, in ${STYLES.length} styles. Add one tiny script and drop them straight into your HTML, or grab the SVG.`;
+const DESCRIPTION = `Free 11×11 pixel icons with personality, in ${STYLES.length} styles. Add one tiny script and drop them straight into your HTML, or grab the SVG.`;
 
 // The share image comes from app/opengraph-image.jpg and app/twitter-image.jpg.
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   title: { default: "Pixicons · Pixel icons with personality", template: "%s · Pixicons" },
   description: DESCRIPTION,
   applicationName: "Pixicons",
-  keywords: ["pixel icons", "icon library", "open source icons", "SVG icons", "pixel art", "icon font", "11x11"],
+  keywords: ["pixel icons", "icon library", "free icons", "SVG icons", "pixel art", "icon font", "11x11"],
   authors: [{ name: "POC studio", url: "https://pocstudio.fr" }],
   creator: "POC studio",
   alternates: { canonical: "/" },

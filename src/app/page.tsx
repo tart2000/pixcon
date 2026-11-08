@@ -105,7 +105,7 @@ export default async function Home() {
         <HeroPattern icons={icons.map((i) => ({ pixels: i.pixels, fill: i.pixels_fill }))} />
         <div className="hero-rows relative mx-auto flex max-w-2xl flex-col items-center justify-center gap-6 px-4 text-center">
           <span className="rounded-full border border-border bg-background px-3 py-1 font-mono text-xs tracking-wide text-muted">
-            Open source · 11×11 pixel grid
+            Free · 11×11 pixel grid
           </span>
           <h1 className="font-display text-6xl leading-[0.95] sm:text-7xl">
             Pixel icons
