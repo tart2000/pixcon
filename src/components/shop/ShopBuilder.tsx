@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { VARIANTS, type Variant } from "@/lib/pixels";
 import type { StyleId } from "@/lib/svg";
 import { matchesQuery } from "@/lib/alts";
@@ -35,8 +35,28 @@ type Initial = Record<"product" | "icon" | "style" | "variant" | "ink" | "color"
 
 const euros = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
 
+const INITIAL_KEYS = ["product", "icon", "style", "variant", "ink", "color", "size"] as const;
+const noSubscribe = () => () => {};
+// The link as the page opened: the creator then rewrites the URL as you go, which mustn't restart it.
+let openedWith: string | undefined;
+const openedSearch = () => (openedWith ??= location.search);
+
+/**
+ * The creator, starting from what the link asks for (?product=mug&icon=cat…). The link is read in the browser so
+ * /shop stays a static page: the server renders the defaults (`search` is null until hydrated, and that first
+ * creator leaves the URL alone), then the creator remounts with the link's settings.
+ */
+export function ShopFromUrl({ icons }: { icons: Item[] }) {
+  const search = useSyncExternalStore(noSubscribe, openedSearch, () => null);
+  // Read the link afresh when /shop is opened again from another page.
+  useEffect(() => () => void (openedWith = undefined), []);
+  const params = new URLSearchParams(search ?? "");
+  const initial = Object.fromEntries(INITIAL_KEYS.map((k) => [k, params.get(k)])) as Initial;
+  return <ShopBuilder key={search ?? "server"} icons={icons} initial={initial} syncUrl={search !== null} />;
+}
+
 /** Product creator: icon, style, variant and ink on one side, the product (colour, size) on the other. */
-export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initial }) {
+export function ShopBuilder({ icons, initial, syncUrl = true }: { icons: Item[]; initial: Initial; syncUrl?: boolean }) {
   const [product, setProduct] = useState<Product>(() => findProduct(initial.product) ?? PRODUCTS[0]);
   const [iconName, setIconName] = useState(
     () => icons.find((i) => i.name === initial.icon)?.name ?? icons.find((i) => i.name === "heart")?.name ?? icons[0]?.name,
@@ -111,8 +131,8 @@ export function ShopBuilder({ icons, initial }: { icons: Item[]; initial: Initia
       ...(product.catalog.colors.length > 1 && { color: color.name.toLowerCase() }),
       ...(color.sizes.length > 1 && { size: sized.size }),
     });
-    window.history.replaceState(null, "", `?${params}`);
-  }, [product, icon, style, shownVariant, ink, color, sized]);
+    if (syncUrl) window.history.replaceState(null, "", `?${params}`);
+  }, [syncUrl, product, icon, style, shownVariant, ink, color, sized]);
 
   if (!icon || !pixels) return <p className="text-muted">No icons yet.</p>;
 

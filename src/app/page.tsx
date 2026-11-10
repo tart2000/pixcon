@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { connection } from "next/server";
 import { CATEGORIES, categoryPath } from "@/lib/categories";
 import { listIcons } from "@/lib/db";
 import { VARIANTS } from "@/lib/pixels";
@@ -60,8 +59,10 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   patchwork: { icon: "skull", text: "Solid and checkered patches, stitched across the grid.", fill: true },
 };
 
+// Static, refreshed hourly and served from the CDN, like the gallery.
+export const revalidate = 3600;
+
 export default async function Home() {
-  await connection();
   const icons = await listIcons("public");
   const byName = new Map(icons.map((i) => [i.name, { name: i.name, pixels: i.pixels, fill: i.pixels_fill }]));
   const glyph = (name: string, size = 20) => {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { VARIANTS, decode, type Variant } from "@/lib/pixels";
-import { DEFAULT_STYLE, downloadFile, iconSvg, slugify, type StyleId } from "@/lib/svg";
+import { DEFAULT_STYLE, downloadFile, iconSvg, slugify, styleFrom, type StyleId } from "@/lib/svg";
 import { useIconColor } from "@/lib/iconColor";
 import { ColorPicker } from "./ColorPicker";
 import { IconGlyph } from "./IconGlyph";
@@ -30,9 +30,7 @@ type Item = {
   isNew: boolean;
 };
 
-/** `initialStyle` comes from the link that opened the gallery (?style=). */
-export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialStyle?: StyleId }) {
-  const [style, pickStyle] = useState<StyleId>(initialStyle ?? DEFAULT_STYLE);
+export function IconGallery({ icons }: { icons: Item[] }) {
   const [variant, setVariant] = useState<Variant>("regular");
   const [grid, setGrid] = useState(false);
   const [size, setSize] = useState(68);
@@ -45,11 +43,10 @@ export function IconGallery({ icons, initialStyle }: { icons: Item[]; initialSty
   const query = params.get("q") ?? "";
   const openName = params.get("icon");
   const setQuery = (q: string) => setUrl("replace", urlWith({ q }));
-  // The style follows the URL too, so a link like /icons?style=studs stays true once you change it.
-  const setStyle = (s: StyleId) => {
-    pickStyle(s);
-    setUrl("replace", urlWith({ style: s === DEFAULT_STYLE ? null : s }));
-  };
+  // The style lives in the URL too (/icons?style=studs), read here rather than on the server so the
+  // gallery pages stay static and are served from the CDN.
+  const style = styleFrom({ style: params.get("style") ?? undefined }) ?? DEFAULT_STYLE;
+  const setStyle = (s: StyleId) => setUrl("replace", urlWith({ style: s === DEFAULT_STYLE ? null : s }));
   // The gallery stays full width until the categories are asked for (or a link opens one).
   // Moving between categories keeps this page mounted, so the style and the size stay as they were.
   const pathname = usePathname();

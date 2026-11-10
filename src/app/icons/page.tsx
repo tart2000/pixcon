@@ -1,8 +1,6 @@
-import { connection } from "next/server";
 import { listGalleryIcons } from "@/lib/db";
 import { pageMeta } from "@/lib/meta";
 import { IconGallery } from "@/components/IconGallery";
-import { styleFrom } from "@/lib/svg";
 
 export const metadata = pageMeta(
   "Icons",
@@ -10,13 +8,15 @@ export const metadata = pageMeta(
   "/icons",
 );
 
-export default async function IconsPage({ searchParams }: PageProps<"/icons">) {
-  await connection();
+// Static, refreshed hourly and served from the CDN (the search, style and open icon are read from the URL
+// in the browser): icons are drawn on a local server, which can't refresh the live site's pages itself.
+export const revalidate = 3600;
 
+export default async function IconsPage() {
   return (
     <>
       <h1 className="sr-only">Icons</h1>
-      <IconGallery icons={await listGalleryIcons()} initialStyle={styleFrom(await searchParams)} />
+      <IconGallery icons={await listGalleryIcons()} />
     </>
   );
 }
