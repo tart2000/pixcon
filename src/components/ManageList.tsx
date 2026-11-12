@@ -322,6 +322,9 @@ function Select<T extends string>({
       {dot && <span className={`pointer-events-none absolute top-1/2 left-2.5 size-2 -translate-y-1/2 rounded-full ${dot}`} />}
       <select
         aria-label={label}
+        // Without this, reloading the page lets the browser restore each select's old choice by position, so a
+        // reordered list shows statuses that belong to other rows (the dot, drawn from the real status, stays right).
+        autoComplete="off"
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value as T)}

@@ -8,9 +8,9 @@ export const metadata = pageMeta(
   "/icons",
 );
 
-// Static, refreshed hourly and served from the CDN (the search, style and open icon are read from the URL
+// Static, refreshed daily and served from the CDN (the search, style and open icon are read from the URL
 // in the browser): icons are drawn on a local server, which can't refresh the live site's pages itself.
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export default async function IconsPage() {
   return (

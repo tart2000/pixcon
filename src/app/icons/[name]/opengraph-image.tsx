@@ -7,8 +7,10 @@ import { decode } from "@/lib/pixels";
 import { DEFAULT_STYLE, iconSvg, STYLES, type StyleId } from "@/lib/svg";
 
 // The share image of an icon's page: the icon big, its name, and a few of its styles.
-// Refreshed hourly like the page; drawn on first request, then cached.
-export const revalidate = 3600;
+// Drawn on first request, then cached until the next deploy (each kit publish deploys):
+// none is drawn by the build, and an icon's image never changes in between.
+export const revalidate = false;
+export const generateStaticParams = () => [];
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "A Pixicons pixel icon";

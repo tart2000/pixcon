@@ -8,8 +8,8 @@ export const metadata = pageMeta(
   "/shop",
 );
 
-// Static, refreshed hourly and served from the CDN; the creator reads the link's settings in the browser.
-export const revalidate = 3600;
+// Static, refreshed daily and served from the CDN; the creator reads the link's settings in the browser.
+export const revalidate = 86400;
 
 export default async function ShopPage() {
   const icons = (await listIcons("public")).sort((a, b) => a.name.localeCompare(b.name));

@@ -23,11 +23,13 @@ export async function kitStatus(): Promise<KitStatus> {
     sql`SELECT built_hash, built_at, requested_at FROM kit_state WHERE id`.catch(() => []),
   ]);
   const built = state?.built_hash as string | null | undefined;
+  const building = !!state?.requested_at && (!state.built_at || state.requested_at > state.built_at);
   return {
     ready: counts.ready as number,
-    // Unknown until a production build records what it holds.
-    stale: !!built && built !== kitHash(validated as Parameters<typeof kitHash>[0]),
-    building: !!state?.requested_at && (!state.built_at || state.requested_at > state.built_at),
+    // Unknown until a production build records what it holds. While a build runs, the live kit is the previous one
+    // and the icons just published differ from it: that's what the build is for, not a change to publish again.
+    stale: !building && !!built && built !== kitHash(validated as Parameters<typeof kitHash>[0]),
+    building,
   };
 }
 

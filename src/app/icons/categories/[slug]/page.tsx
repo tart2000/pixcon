@@ -6,8 +6,8 @@ import { IconGallery } from "@/components/IconGallery";
 
 type Props = PageProps<"/icons/categories/[slug]">;
 
-// Static like /icons: one page per category, built ahead and refreshed hourly.
-export const revalidate = 3600;
+// Static like /icons: one page per category, built ahead and refreshed daily.
+export const revalidate = 86400;
 export const generateStaticParams = () => CATEGORIES.map((c) => ({ slug: c.slug }));
 
 const findCategory = async ({ params }: Props) => {

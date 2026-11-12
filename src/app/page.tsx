@@ -59,8 +59,8 @@ const STYLE_SHOWCASE: Record<StyleId, { icon: string; text: string; fill?: boole
   patchwork: { icon: "skull", text: "Solid and checkered patches, stitched across the grid.", fill: true },
 };
 
-// Static, refreshed hourly and served from the CDN, like the gallery.
-export const revalidate = 3600;
+// Static, refreshed daily and served from the CDN, like the gallery.
+export const revalidate = 86400;
 
 export default async function Home() {
   const icons = await listIcons("public");

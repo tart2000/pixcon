@@ -5,8 +5,8 @@ import { iconUrl } from "@/lib/paths";
 
 const SITE = "https://www.pixicons.io";
 
-// Rebuilt hourly, like the icon pages.
-export const revalidate = 3600;
+// Rebuilt daily, like the icon pages.
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const icons = await listIcons("public");

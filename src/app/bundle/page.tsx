@@ -16,8 +16,8 @@ export async function generateMetadata() {
   );
 }
 
-// The figures follow the library: refreshed hourly, like the icon pages.
-export const revalidate = 3600;
+// The figures follow the library: refreshed daily, like the icon pages.
+export const revalidate = 86400;
 
 /** Formats, one zip per buyer, the same everywhere: SVG then PNG. */
 const FORMATS = ["svg", "png"] as const;

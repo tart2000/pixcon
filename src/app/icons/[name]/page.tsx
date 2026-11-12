@@ -10,9 +10,10 @@ type Props = PageProps<"/icons/[name]">;
 /** How many icons sharing a tag are shown under the icon. */
 const RELATED = 20;
 
-// One static page per validated icon, built ahead and refreshed hourly: icons are drawn on a
-// local server, which can't refresh the live site's pages itself. New icons render on first visit.
-export const revalidate = 3600;
+// One static page per validated icon, built ahead and refreshed daily: icons are drawn on a
+// local server, which can't refresh the live site's pages itself, but each kit publish
+// redeploys. New icons render on first visit.
+export const revalidate = 86400;
 
 // The build renders every page in a row: share one read of the icons between them for a minute.
 let memo: { at: number; icons: ReturnType<typeof listGalleryIcons> } | null = null;
